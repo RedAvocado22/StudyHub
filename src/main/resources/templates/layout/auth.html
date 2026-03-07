@@ -20,15 +20,6 @@
                     </a>
                 </div>
 
-                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
-                    <span th:text="${successMessage}"></span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <span th:text="${errorMessage}"></span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-
                 <div class="card shadow-sm">
                     <div class="card-body p-4">
                         <div layout:fragment="content"></div>
@@ -39,6 +30,34 @@
         </div>
     </div>
 
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div th:if="${successMessage}" class="toast align-items-center text-white bg-success border-0"
+             role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-check-circle me-2"></i>
+                    <span th:text="${successMessage}"></span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+        <div th:if="${errorMessage}" class="toast align-items-center text-white bg-danger border-0"
+             role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-exclamation-circle me-2"></i>
+                    <span th:text="${errorMessage}"></span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.querySelectorAll('.toast').forEach(el => {
+            bootstrap.Toast.getOrCreateInstance(el, { delay: 4000 }).show();
+        });
+    </script>
 </body>
 </html>
