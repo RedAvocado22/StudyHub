@@ -7,6 +7,8 @@ import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.FlashMap;
+import org.springframework.web.servlet.support.SessionFlashMapManager;
 
 import java.io.IOException;
 
@@ -17,12 +19,22 @@ public class CustomAuthFailureHandler extends SimpleUrlAuthenticationFailureHand
     public void onAuthenticationFailure(HttpServletRequest request,
                                         HttpServletResponse response,
                                         AuthenticationException exception) throws IOException {
-        String url = "/login?error";
+        String message;
+        String redirectUrl = "/login";
+
         if (exception instanceof DisabledException) {
-            url = "/login?unverified";
+            message = "Your email has not been verified yet.";
+            redirectUrl = "/login?unverified";
         } else if (exception instanceof LockedException) {
-            url = "/login?inactive";
+            message = "Your account has been deactivated. Please contact support.";
+        } else {
+            message = "Invalid email/username or password.";
         }
-        getRedirectStrategy().sendRedirect(request, response, url);
+
+        FlashMap flashMap = new FlashMap();
+        flashMap.put("errorMessage", message);
+        new SessionFlashMapManager().saveOutputFlashMap(flashMap, request, response);
+
+        getRedirectStrategy().sendRedirect(request, response, redirectUrl);
     }
 }

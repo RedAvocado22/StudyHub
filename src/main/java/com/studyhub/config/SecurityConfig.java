@@ -2,6 +2,7 @@ package com.studyhub.config;
 
 import com.studyhub.security.CustomAuthFailureHandler;
 import com.studyhub.security.CustomAuthSuccessHandler;
+import com.studyhub.security.CustomLogoutSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,6 +19,7 @@ public class SecurityConfig {
 
     private final CustomAuthFailureHandler authFailureHandler;
     private final CustomAuthSuccessHandler authSuccessHandler;
+    private final CustomLogoutSuccessHandler logoutSuccessHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -57,7 +59,7 @@ public class SecurityConfig {
             )
             .logout(logout -> logout
                 .logoutUrl("/logout")
-                .logoutSuccessUrl("/login?logout")
+                .logoutSuccessHandler(logoutSuccessHandler)
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
                 .permitAll()

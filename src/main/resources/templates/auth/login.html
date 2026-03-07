@@ -10,22 +10,13 @@
 
     <h5 class="card-title mb-4 fw-bold">User Login</h5>
 
-    <div th:if="${param.error}" class="alert alert-danger" role="alert">
-        Invalid email/username or password.
-    </div>
-    <div th:if="${param.inactive}" class="alert alert-warning" role="alert">
-        Your account has been deactivated. Please contact support.
-    </div>
-    <div th:if="${param.unverified}" class="alert alert-warning" role="alert">
-        <p class="mb-2">Your email has not been verified yet.</p>
+    <div th:if="${param.unverified}" class="border border-warning rounded p-3 mb-3 bg-warning-subtle">
+        <p class="mb-2 small fw-semibold"><i class="bi bi-envelope me-1"></i>Resend verification email</p>
         <form th:action="@{/resend-verification}" method="post" class="d-flex gap-2">
             <input type="email" name="email" class="form-control form-control-sm"
                    placeholder="Enter your email" required>
-            <button type="submit" class="btn btn-warning btn-sm text-nowrap">Resend Link</button>
+            <button type="submit" class="btn btn-warning btn-sm text-nowrap">Resend</button>
         </form>
-    </div>
-    <div th:if="${param.logout}" class="alert alert-info" role="alert">
-        You have been logged out.
     </div>
 
     <form th:action="@{/login}" method="post">
