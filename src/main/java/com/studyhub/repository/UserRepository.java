@@ -1,5 +1,6 @@
 package com.studyhub.repository;
 
+import com.studyhub.enums.UserRole;
 import com.studyhub.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -20,4 +21,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
 
     boolean existsByUsername(String username);
+
+    long countByRole(UserRole role);
 }
