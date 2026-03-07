@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/auth}">
+<head>
+    <title>Login</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <h5 class="card-title mb-4 fw-bold">User Login</h5>
+
+    <div th:if="${param.error}" class="alert alert-danger" role="alert">
+        Invalid email/username or password.
+    </div>
+    <div th:if="${param.inactive}" class="alert alert-warning" role="alert">
+        Your account has been deactivated. Please contact support.
+    </div>
+    <div th:if="${param.unverified}" class="alert alert-warning" role="alert">
+        <p class="mb-2">Your email has not been verified yet.</p>
+        <form th:action="@{/resend-verification}" method="post" class="d-flex gap-2">
+            <input type="email" name="email" class="form-control form-control-sm"
+                   placeholder="Enter your email" required>
+            <button type="submit" class="btn btn-warning btn-sm text-nowrap">Resend Link</button>
+        </form>
+    </div>
+    <div th:if="${param.logout}" class="alert alert-info" role="alert">
+        You have been logged out.
+    </div>
+
+    <form th:action="@{/login}" method="post">
+        <div class="mb-3">
+            <label for="username" class="form-label">Email or Username <span class="text-danger">*</span></label>
+            <input type="text" id="username" name="username" class="form-control"
+                   placeholder="Enter email or username" required autofocus>
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
+            <input type="password" id="password" name="password" class="form-control"
+                   placeholder="Enter password" required>
+        </div>
+        <div class="d-flex justify-content-between mb-3">
+            <a th:href="@{/forgot-password}" class="small text-decoration-none">Forgot Password?</a>
+            <a th:href="@{/register}" class="small text-decoration-none">Don't have an account?</a>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Login</button>
+    </form>
+
+</div>
+</body>
+</html>

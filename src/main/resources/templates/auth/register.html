@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/auth}">
+<head>
+    <title>Register</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <h5 class="card-title mb-4 fw-bold">User Register</h5>
+
+    <form th:action="@{/register}" th:object="${registerDTO}" method="post" novalidate>
+        <div class="mb-3">
+            <label for="fullName" class="form-label">Full Name <span class="text-danger">*</span></label>
+            <input type="text" id="fullName" th:field="*{fullName}" class="form-control"
+                   th:classappend="${#fields.hasErrors('fullName')} ? 'is-invalid'"
+                   placeholder="Enter your full name">
+            <div class="invalid-feedback" th:errors="*{fullName}"></div>
+        </div>
+        <div class="mb-3">
+            <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+            <input type="email" id="email" th:field="*{email}" class="form-control"
+                   th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'"
+                   placeholder="Enter your email">
+            <div class="invalid-feedback" th:errors="*{email}"></div>
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
+            <input type="password" id="password" th:field="*{password}" class="form-control"
+                   th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'"
+                   placeholder="Minimum 8 characters">
+            <div class="invalid-feedback" th:errors="*{password}"></div>
+        </div>
+        <div class="mb-4">
+            <label for="passwordConfirm" class="form-label">Password Confirm <span class="text-danger">*</span></label>
+            <input type="password" id="passwordConfirm" th:field="*{passwordConfirm}" class="form-control"
+                   th:classappend="${#fields.hasErrors('passwordConfirm')} ? 'is-invalid'"
+                   placeholder="Re-enter your password">
+            <div class="invalid-feedback" th:errors="*{passwordConfirm}"></div>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Register</button>
+        <p class="text-center mt-3 mb-0 small">
+            Already have an account? <a th:href="@{/login}" class="text-decoration-none">Login here</a>
+        </p>
+    </form>
+
+</div>
+</body>
+</html>

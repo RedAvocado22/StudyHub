@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<nav th:fragment="header" class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold text-primary" th:href="@{/}">StudyHub</a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="mainNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/blogs}">Blogs</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/courses}">Courses</a>
+                </li>
+            </ul>
+
+            <div class="d-flex align-items-center gap-2" sec:authorize="isAnonymous()">
+                <a th:href="@{/login}" class="btn btn-outline-primary btn-sm">Login</a>
+                <a th:href="@{/register}" class="btn btn-primary btn-sm">Register</a>
+            </div>
+
+            <div class="dropdown" sec:authorize="isAuthenticated()">
+                <a class="nav-link dropdown-toggle d-flex align-items-center gap-2"
+                   href="#" role="button" data-bs-toggle="dropdown">
+                    <i class="bi bi-person-circle fs-5"></i>
+                    <span sec:authentication="principal.user.fullName"></span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li sec:authorize="hasAnyAuthority('ADMIN','MANAGER','MARKETING')">
+                        <a class="dropdown-item" th:href="@{/admin}">
+                            <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li sec:authorize="hasAnyAuthority('ADMIN','MANAGER','MEMBER')">
+                        <a class="dropdown-item" th:href="@{/my-courses}">
+                            <i class="bi bi-book me-2"></i>My Courses
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" th:href="@{/profile}">
+                            <i class="bi bi-person me-2"></i>User Profile
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <form th:action="@{/logout}" method="post">
+                            <button type="submit" class="dropdown-item text-danger">
+                                <i class="bi bi-box-arrow-right me-2"></i>Log Out
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+</body>
+</html>
