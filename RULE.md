@@ -43,6 +43,24 @@
 - Header, footer, and sidebar stay in `fragments/` and are included via `th:replace`.
 - Page content goes inside `<div layout:fragment="content">`.
 
+## Commit Messages
+
+Format: `type: short description` (max 70 characters)
+
+| Type | When to use |
+|---|---|
+| `feat` | New feature |
+| `fix` | Bug fix |
+| `refactor` | Code change that is not a feat or fix |
+| `style` | UI/CSS changes only |
+| `docs` | Documentation changes |
+| `chore` | Build, config, or dependency changes |
+
+Rules:
+- Use imperative mood: `add login page` not `added login page`
+- Lowercase, no period at the end
+- Reference issue number when applicable: `feat: add enrollment form (#12)`
+
 ## Package Structure
 ```
 com.studyhub

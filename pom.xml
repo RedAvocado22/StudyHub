@@ -80,6 +80,13 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- Dotenv -->
+        <dependency>
+            <groupId>me.paulschwarz</groupId>
+            <artifactId>spring-dotenv</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+
         <!-- Thymeleaf Layout Dialect -->
         <dependency>
             <groupId>nz.net.ultraq.thymeleaf</groupId>
