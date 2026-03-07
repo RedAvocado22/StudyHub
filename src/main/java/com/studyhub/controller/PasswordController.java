@@ -39,8 +39,9 @@ public class PasswordController {
 
     @GetMapping("/reset-password")
     public String resetPasswordPage(@RequestParam String token, Model model) {
-        model.addAttribute("token", token);
-        model.addAttribute("resetDTO", new ResetPasswordDTO());
+        ResetPasswordDTO resetDTO = new ResetPasswordDTO();
+        resetDTO.setToken(token);
+        model.addAttribute("resetDTO", resetDTO);
         return "auth/reset-password";
     }
 
@@ -50,7 +51,6 @@ public class PasswordController {
                                 Model model,
                                 RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
-            model.addAttribute("token", resetDTO.getToken());
             return "auth/reset-password";
         }
         try {
@@ -59,7 +59,6 @@ public class PasswordController {
                     "Password reset successfully. Please log in.");
             return "redirect:/login";
         } catch (IllegalArgumentException e) {
-            model.addAttribute("token", resetDTO.getToken());
             model.addAttribute("errorMessage", e.getMessage());
             return "auth/reset-password";
         }
