@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Setting List</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <section class="py-4">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="fw-bold mb-0">Setting List</h2>
+                <a class="btn btn-primary" th:href="@{/admin/settings/new}">New Setting</a>
+            </div>
+
+            <form th:action="@{/admin/settings}" method="get" class="row g-2 mb-3">
+                <input type="hidden" name="sortBy" th:value="${sortBy}">
+                <input type="hidden" name="direction" th:value="${direction}">
+
+                <div class="col-md-3">
+                    <select name="type" class="form-select">
+                        <option value="">All Types</option>
+                        <option th:each="typeName : ${types}"
+                                th:value="${typeName}"
+                                th:text="${typeName}"
+                                th:selected="${typeName == selectedType}"></option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <select name="status" class="form-select">
+                        <option value="">All Statuses</option>
+                        <option value="ACTIVE" th:selected="${selectedStatus == 'ACTIVE'}">Active</option>
+                        <option value="INACTIVE" th:selected="${selectedStatus == 'INACTIVE'}">Inactive</option>
+                    </select>
+                </div>
+
+                <div class="col-md-5">
+                    <input name="keyword"
+                           class="form-control"
+                           th:value="${keyword}"
+                           placeholder="Enter keyword(s) to search">
+                </div>
+
+                <div class="col-md-2 d-flex gap-2">
+                    <button class="btn btn-outline-primary flex-grow-1" type="submit">Search</button>
+                    <a th:href="@{/admin/settings}" class="btn btn-outline-secondary">Clear</a>
+                </div>
+            </form>
+
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle">
+                    <thead class="table-light">
+                    <tr>
+                        <th><a class="text-decoration-none text-dark" th:href="@{/admin/settings(type=${selectedType},status=${selectedStatus},keyword=${keyword},sortBy='id',direction=${sortBy == 'id' and direction == 'asc' ? 'desc' : 'asc'})}">Id</a></th>
+                        <th><a class="text-decoration-none text-dark" th:href="@{/admin/settings(type=${selectedType},status=${selectedStatus},keyword=${keyword},sortBy='name',direction=${sortBy == 'name' and direction == 'asc' ? 'desc' : 'asc'})}">Name</a></th>
+                        <th><a class="text-decoration-none text-dark" th:href="@{/admin/settings(type=${selectedType},status=${selectedStatus},keyword=${keyword},sortBy='type',direction=${sortBy == 'type' and direction == 'asc' ? 'desc' : 'asc'})}">Type</a></th>
+                        <th><a class="text-decoration-none text-dark" th:href="@{/admin/settings(type=${selectedType},status=${selectedStatus},keyword=${keyword},sortBy='value',direction=${sortBy == 'value' and direction == 'asc' ? 'desc' : 'asc'})}">Value</a></th>
+                        <th><a class="text-decoration-none text-dark" th:href="@{/admin/settings(type=${selectedType},status=${selectedStatus},keyword=${keyword},sortBy='priority',direction=${sortBy == 'priority' and direction == 'asc' ? 'desc' : 'asc'})}">Priority</a></th>
+                        <th><a class="text-decoration-none text-dark" th:href="@{/admin/settings(type=${selectedType},status=${selectedStatus},keyword=${keyword},sortBy='status',direction=${sortBy == 'status' and direction == 'asc' ? 'desc' : 'asc'})}">Status</a></th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(settings)}">
+                        <td colspan="7" class="text-center text-muted py-4">No settings found.</td>
+                    </tr>
+                    <tr th:each="item : ${settings}">
+                        <td th:text="${item.id}"></td>
+                        <td th:text="${item.name}"></td>
+                        <td th:text="${item.typeName}"></td>
+                        <td th:text="${item.value}"></td>
+                        <td th:text="${item.priority}"></td>
+                        <td>
+                            <span th:if="${item.status.name() == 'ACTIVE'}" class="badge bg-success">Active</span>
+                            <span th:if="${item.status.name() == 'INACTIVE'}" class="badge bg-secondary">Inactive</span>
+                        </td>
+                        <td>
+                            <div class="d-flex gap-2">
+                                <a class="btn btn-sm btn-outline-primary"
+                                   th:href="@{/admin/settings/{id}(id=${item.id})}">Edit</a>
+                                <form th:action="@{/admin/settings/{id}/toggle-status(id=${item.id})}" method="post">
+                                    <input type="hidden" name="type" th:value="${selectedType}">
+                                    <input type="hidden" name="status" th:value="${selectedStatus}">
+                                    <input type="hidden" name="keyword" th:value="${keyword}">
+                                    <input type="hidden" name="sortBy" th:value="${sortBy}">
+                                    <input type="hidden" name="direction" th:value="${direction}">
+                                    <button type="submit"
+                                            class="btn btn-sm"
+                                            th:classappend="${item.status.name() == 'ACTIVE'} ? 'btn-outline-danger' : 'btn-outline-success'"
+                                            th:text="${item.status.name() == 'ACTIVE'} ? 'Deactivate' : 'Activate'"></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</div>
+</body>
+</html>
