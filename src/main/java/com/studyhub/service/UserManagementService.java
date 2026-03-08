@@ -98,6 +98,7 @@ public class UserManagementService {
                 .mobile(dto.getMobile())
                 .role(dto.getRole())
                 .status(dto.getStatus())
+                .profileImage(dto.getProfileImageUrl())
                 .build();
         userRepository.save(user);
         emailService.sendNewAccountEmail(user, rawPassword);

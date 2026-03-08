@@ -13,9 +13,23 @@
         <h4 class="fw-bold mb-0">Add User</h4>
     </div>
 
-    <div class="card border-0 shadow-sm" style="max-width: 560px;">
+    <div class="card border-0 shadow-sm">
         <div class="card-body">
-            <form th:action="@{/admin/users}" method="post" th:object="${createUserDTO}">
+            <form th:action="@{/admin/users}" method="post" enctype="multipart/form-data" th:object="${createUserDTO}">
+                <div class="mb-4 d-flex flex-column align-items-center gap-2">
+                    <div id="avatarPreview"
+                         class="rounded-circle bg-secondary bg-opacity-25 d-flex align-items-center justify-content-center overflow-hidden"
+                         style="width:96px;height:96px;flex-shrink:0;">
+                        <i id="avatarIcon" class="bi bi-person-fill fs-1 text-secondary"></i>
+                        <img id="avatarImg" class="d-none w-100 h-100" style="object-fit:cover;" alt="Avatar preview">
+                    </div>
+                    <label class="btn btn-outline-secondary btn-sm mb-0">
+                        <i class="bi bi-upload me-1"></i>Upload Avatar
+                        <input type="file" name="avatar" accept="image/*" class="d-none"
+                               onchange="previewAvatar(this)">
+                    </label>
+                    <small class="text-muted">Optional · jpg, png, gif, webp · max 10 MB</small>
+                </div>
                 <div class="mb-3">
                     <label class="form-label">Full Name</label>
                     <input type="text" name="fullName" class="form-control" required
@@ -63,6 +77,16 @@
             </form>
         </div>
     </div>
+    <script>
+        function previewAvatar(input) {
+            if (!input.files || !input.files[0]) return;
+            const img = document.getElementById('avatarImg');
+            const icon = document.getElementById('avatarIcon');
+            img.src = URL.createObjectURL(input.files[0]);
+            img.classList.remove('d-none');
+            icon.classList.add('d-none');
+        }
+    </script>
 </div>
 </body>
 </html>

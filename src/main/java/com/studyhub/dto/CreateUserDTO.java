@@ -12,4 +12,5 @@ public class CreateUserDTO {
     private String mobile;
     private UserRole role;
     private UserStatus status;
+    private String profileImageUrl;
 }
