@@ -42,6 +42,8 @@ public class SecurityConfig {
                     .hasAuthority("ADMIN")
                 .requestMatchers("/admin/posts/**")
                     .hasAnyAuthority("ADMIN", "MARKETING")
+                .requestMatchers("/admin/enrollments/**")
+                    .hasAnyAuthority("ADMIN", "MANAGER")
                 .requestMatchers("/admin/**")
                     .hasAnyAuthority("ADMIN", "MANAGER")
                 .requestMatchers(

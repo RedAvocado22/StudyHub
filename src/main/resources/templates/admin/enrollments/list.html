@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Course Enrollments</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-4">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0 fw-bold">Course Enrollments</h4>
+            <a th:href="@{/admin/enrollments/new}" class="btn btn-success btn-sm">
+                <i class="bi bi-plus-lg me-1"></i>Add New
+            </a>
+        </div>
+
+        <form method="get" class="row g-2 mb-4">
+            <div class="col-12 col-md-auto">
+                <select name="courseId" class="form-select form-select-sm">
+                    <option value="">All Courses</option>
+                    <option th:each="c : ${courses}"
+                            th:value="${c.id}"
+                            th:text="${c.title}"
+                            th:selected="${c.id == selectedCourseId}">
+                    </option>
+                </select>
+            </div>
+            <div class="col-12 col-md-auto">
+                <select name="status" class="form-select form-select-sm">
+                    <option value="">All Status</option>
+                    <option th:each="s : ${statuses}"
+                            th:value="${s}"
+                            th:text="${s}"
+                            th:selected="${s == selectedStatus}">
+                    </option>
+                </select>
+            </div>
+            <div class="col-12 col-md-auto">
+                <input type="text" name="keyword" class="form-control form-control-sm"
+                       placeholder="Full Name, Email, Course"
+                       th:value="${keyword}"/>
+            </div>
+            <div class="col-12 col-md-auto">
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="bi bi-funnel me-1"></i>Filter
+                </button>
+            </div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Course</th>
+                    <th>User Info</th>
+                    <th>Enrolled At</th>
+                    <th>Status</th>
+                    <th>Progress</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="e : ${enrollments}">
+                    <td th:text="${e.id}"></td>
+                    <td>
+                        <div class="fw-semibold" th:text="${e.courseTitle}"></div>
+                        <small class="text-muted" th:text="'Fee($): ' + ${e.fee}"></small>
+                    </td>
+                    <td>
+                        <div th:text="${e.fullName}"></div>
+                        <small class="text-muted" th:text="${e.email}"></small>
+                    </td>
+                    <td>
+                        <small th:text="${#temporals.format(e.enrolledAt, 'yyyy-MM-dd HH:mm:ss')}"></small>
+                    </td>
+                    <td>
+                        <span th:text="${e.status}"
+                              th:class="${e.status.name() == 'APPROVED'}
+                                         ? 'badge bg-success'
+                                         : (${e.status.name() == 'REJECTED'}
+                                            ? 'badge bg-danger'
+                                            : 'badge bg-warning text-dark')">
+                        </span>
+                    </td>
+                    <td th:text="${e.progress}"></td>
+                    <td>
+                        <div class="d-flex gap-1">
+                            <a th:href="@{/admin/enrollments/{id}/edit(id=${e.id})}"
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form th:action="@{/admin/enrollments/{id}/delete(id=${e.id})}"
+                                  method="post" class="d-inline"
+                                  onsubmit="return confirm('Delete this enrollment?')">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(enrollments)}">
+                    <td colspan="7" class="text-center text-muted py-4">No enrollments found.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <nav th:if="${totalPages > 1}">
+            <ul class="pagination pagination-sm">
+                <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                    class="page-item"
+                    th:classappend="${i == currentPage} ? ' active'">
+                    <a class="page-link"
+                       th:href="@{/templates/admin/enrollments(page=${i},
+                                  courseId=${selectedCourseId},
+                                  status=${selectedStatus},
+                                  keyword=${keyword})}"
+                       th:text="${i + 1}">
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+    </div>
+</div>
+</body>
+</html>

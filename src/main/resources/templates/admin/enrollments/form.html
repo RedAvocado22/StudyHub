@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Enrollment Details</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-4">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0 fw-bold" th:text="${isNew} ? 'New Enrollment' : 'Edit Enrollment'"></h4>
+            <a th:href="@{/admin/enrollments}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>Back to List
+            </a>
+        </div>
+
+        <div class="card shadow-sm" style="max-width: 720px;">
+            <div class="card-body p-4">
+                <form th:action="${isNew}
+                                 ? @{/admin/enrollments}
+                                 : @{/admin/enrollments/{id}(id=${dto.id})}"
+                      th:object="${dto}"
+                      method="post">
+
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <label class="form-label fw-semibold">Course <span class="text-danger">*</span></label>
+                            <select th:field="*{courseId}" class="form-select" required>
+                                <option value="">-- Select Course --</option>
+                                <option th:each="c : ${courses}"
+                                        th:value="${c.id}"
+                                        th:text="${c.title}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Fee ($)</label>
+                            <input type="number" step="0.01" min="0"
+                                   th:field="*{fee}" class="form-control"
+                                   placeholder="Auto from course"/>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Username or Email</label>
+                            <input type="text" th:field="*{usernameOrEmail}"
+                                   class="form-control"
+                                   placeholder="Link to existing user (optional)"/>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Full Name <span class="text-danger">*</span></label>
+                            <input type="text" th:field="*{fullName}"
+                                   class="form-control" required/>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Email <span class="text-danger">*</span></label>
+                            <input type="email" th:field="*{email}"
+                                   class="form-control" required/>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Mobile</label>
+                            <input type="text" th:field="*{mobile}" class="form-control"/>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Enroll Reason</label>
+                        <textarea th:field="*{enrollReason}" class="form-control" rows="3"></textarea>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <label class="form-label fw-semibold d-block">Status</label>
+                            <div th:each="s : ${statuses}" class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio"
+                                       th:field="*{status}" th:value="${s}"/>
+                                <label class="form-check-label" th:text="${s}"></label>
+                            </div>
+                        </div>
+                        <div class="col-md-4" th:if="${!isNew}">
+                            <label class="form-label fw-semibold">Last Updated</label>
+                            <input type="text"
+                                   th:value="${dto.lastUpdated != null ?
+                                              #temporals.format(dto.lastUpdated, 'yyyy-MM-dd HH:mm:ss') : ''}"
+                                   class="form-control form-control-sm" readonly/>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Rejected Notes</label>
+                        <textarea th:field="*{rejectedNotes}" class="form-control" rows="2"></textarea>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Progress (%)</label>
+                            <input type="number" step="0.01" min="0" max="100"
+                                   th:field="*{progress}" class="form-control"/>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Completed At</label>
+                            <input type="datetime-local" th:field="*{completedAt}"
+                                   class="form-control"/>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-1"></i>Submit
+                        </button>
+                        <a th:href="@{/admin/enrollments}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+</body>
+</html>
