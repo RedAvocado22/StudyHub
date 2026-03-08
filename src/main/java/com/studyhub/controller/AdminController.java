@@ -6,7 +6,9 @@ import com.studyhub.enums.UserRole;
 import com.studyhub.enums.UserStatus;
 import com.studyhub.security.StudyHubUserDetails;
 import com.studyhub.service.CourseManagementService;
+import com.studyhub.service.FileUploadService;
 import com.studyhub.service.UserManagementService;
+import org.springframework.web.multipart.MultipartFile;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -27,6 +29,7 @@ public class AdminController {
 
     private final UserManagementService userManagementService;
     private final CourseManagementService courseManagementService;
+    private final FileUploadService fileUploadService;
 
     @ModelAttribute
     public void exposeRequestUri(HttpServletRequest request, Model model) {
@@ -73,8 +76,13 @@ public class AdminController {
     }
 
     @PostMapping("/users")
-    public String createUser(@ModelAttribute CreateUserDTO createUserDTO, RedirectAttributes redirectAttributes) {
+    public String createUser(@ModelAttribute CreateUserDTO createUserDTO,
+                             @RequestParam(required = false) MultipartFile avatar,
+                             RedirectAttributes redirectAttributes) {
         try {
+            if (avatar != null && !avatar.isEmpty()) {
+                createUserDTO.setProfileImageUrl(fileUploadService.uploadImage(avatar));
+            }
             var user = userManagementService.createUser(createUserDTO);
             redirectAttributes.addFlashAttribute("successMessage", "User created and credentials sent to " + user.getEmail() + ".");
             return "redirect:/admin/users/" + user.getId();
