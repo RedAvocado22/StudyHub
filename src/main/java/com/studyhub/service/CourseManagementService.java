@@ -12,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static org.springframework.util.StringUtils.hasText;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -23,6 +25,29 @@ public class CourseManagementService {
 
     public List<CourseCardDTO> getFeaturedCourses() {
         return courseRepository.findTop6ByPublishedTrueOrderByCreatedAtDesc()
+                .stream()
+                .map(this::toCourseCardDTO)
+                .toList();
+    }
+
+    public List<CourseCardDTO> getAllActiveCoursesSortedByName() {
+        return courseRepository.findByPublishedTrueOrderByTitleAsc()
+                .stream()
+                .map(this::toCourseCardDTO)
+                .toList();
+    }
+
+    public List<CourseCardDTO> searchActiveCoursesSortedByName(String keyword) {
+        if (!hasText(keyword)) {
+            return getAllActiveCoursesSortedByName();
+        }
+
+        String normalizedKeyword = keyword.trim();
+        return courseRepository
+                .findByPublishedTrueAndTitleContainingIgnoreCaseOrPublishedTrueAndDescriptionContainingIgnoreCaseOrderByTitleAsc(
+                        normalizedKeyword,
+                        normalizedKeyword
+                )
                 .stream()
                 .map(this::toCourseCardDTO)
                 .toList();

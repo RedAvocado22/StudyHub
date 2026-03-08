@@ -11,5 +11,14 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     @EntityGraph(attributePaths = {"category", "manager"})
     List<Course> findTop6ByPublishedTrueOrderByCreatedAtDesc();
 
+    @EntityGraph(attributePaths = {"category", "manager"})
+    List<Course> findByPublishedTrueOrderByTitleAsc();
+
+    @EntityGraph(attributePaths = {"category", "manager"})
+    List<Course> findByPublishedTrueAndTitleContainingIgnoreCaseOrPublishedTrueAndDescriptionContainingIgnoreCaseOrderByTitleAsc(
+            String titleKeyword,
+            String descriptionKeyword
+    );
+
     long countByPublishedTrue();
 }
