@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin}">
+<head><title>User Detail</title></head>
+<body>
+<div layout:fragment="content">
+
+    <div class="d-flex align-items-center gap-2 mb-4">
+        <a th:href="@{/admin/users}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Back
+        </a>
+        <h4 class="fw-bold mb-0" th:text="${user.fullName}"></h4>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm text-center p-3">
+                <img th:if="${user.profileImage != null}"
+                     th:src="${user.profileImage}"
+                     class="rounded-circle mx-auto mb-3"
+                     width="96" height="96" alt="Avatar">
+                <div th:unless="${user.profileImage != null}"
+                     class="rounded-circle bg-secondary bg-opacity-25 mx-auto mb-3 d-flex align-items-center justify-content-center"
+                     style="width:96px;height:96px;">
+                    <i class="bi bi-person-fill fs-2 text-secondary"></i>
+                </div>
+                <h5 class="fw-bold mb-1" th:text="${user.fullName}"></h5>
+                <p class="text-muted small mb-2" th:text="'@' + ${user.username}"></p>
+                <div class="d-flex justify-content-center gap-1 flex-wrap">
+                <span class="badge rounded-pill"
+                      th:text="${user.role}"
+                      th:classappend="${user.role.name() == 'ADMIN'} ? 'bg-danger'
+                                   : (${user.role.name() == 'MANAGER'} ? 'bg-warning text-dark'
+                                   : (${user.role.name() == 'MARKETING'} ? 'bg-purple'
+                                   : 'bg-primary'))"
+                      th:style="${user.role.name() == 'MARKETING'} ? 'background:#6f42c1' : ''">
+                </span>
+                <span class="badge rounded-pill"
+                      th:text="${user.status}"
+                      th:classappend="${user.status.name() == 'ACTIVE'} ? 'bg-success'
+                                   : (${user.status.name() == 'INACTIVE'} ? 'bg-secondary'
+                                   : 'bg-warning text-dark')">
+                </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header bg-transparent fw-semibold">Account Info</div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4 text-muted fw-normal">Full Name</dt>
+                        <dd class="col-sm-8" th:text="${user.fullName}"></dd>
+
+                        <dt class="col-sm-4 text-muted fw-normal">Username</dt>
+                        <dd class="col-sm-8" th:text="${user.username}"></dd>
+
+                        <dt class="col-sm-4 text-muted fw-normal">Email</dt>
+                        <dd class="col-sm-8" th:text="${user.email}"></dd>
+
+                        <dt class="col-sm-4 text-muted fw-normal">Mobile</dt>
+                        <dd class="col-sm-8" th:text="${user.mobile ?: '—'}"></dd>
+
+                        <dt class="col-sm-4 text-muted fw-normal">Joined</dt>
+                        <dd class="col-sm-8"
+                            th:text="${#temporals.format(user.createdAt, 'dd/MM/yyyy HH:mm')}"></dd>
+
+                        <dt class="col-sm-4 text-muted fw-normal">Last Updated</dt>
+                        <dd class="col-sm-8 mb-0"
+                            th:text="${#temporals.format(user.updatedAt, 'dd/MM/yyyy HH:mm')}"></dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-transparent fw-semibold">Update Role</div>
+                        <div class="card-body">
+                            <form th:action="@{/admin/users/{id}/role(id=${user.id})}" method="post">
+                                <div class="mb-3">
+                                    <select name="role" class="form-select">
+                                        <option th:each="r : ${roles}"
+                                                th:value="${r}"
+                                                th:text="${r}"
+                                                th:selected="${r == user.role}"></option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-warning w-100">
+                                    <i class="bi bi-person-badge me-1"></i>Update Role
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header bg-transparent fw-semibold">Update Status</div>
+                        <div class="card-body">
+                            <form th:action="@{/admin/users/{id}/status(id=${user.id})}" method="post">
+                                <div class="mb-3">
+                                    <select name="status" class="form-select">
+                                        <option th:each="s : ${statuses}"
+                                                th:value="${s}"
+                                                th:text="${s}"
+                                                th:selected="${s == user.status}"></option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-toggle-on me-1"></i>Update Status
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
