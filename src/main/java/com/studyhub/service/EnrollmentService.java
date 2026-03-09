@@ -12,6 +12,7 @@ import com.studyhub.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class EnrollmentService {
 
     private final EnrollmentRepository enrollmentRepository;
@@ -36,7 +38,8 @@ public class EnrollmentService {
         return toDto(requireEnrollment(id));
     }
     public List<CourseDTO> findAllCourses() {
-        return courseRepository.findAll().stream().map(this::toCourseDto).toList();
+        return courseRepository.findAll(Sort.by(Sort.Direction.ASC, "title"))
+                .stream().map(this::toCourseDto).toList();
     }
 
     private CourseDTO toCourseDto(Course c) {
@@ -49,7 +52,9 @@ public class EnrollmentService {
         return dto;
     }
 
-    public List<EnrollmentDTO> findByUser(User user) {
+    public List<EnrollmentDTO> findByUsername(String username) {
+        User user = userRepository.findByEmailOrUsername(username, username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found."));
         return enrollmentRepository.findByUserOrderByEnrolledAtDesc(user)
                 .stream().map(this::toDto).toList();
     }
@@ -102,7 +107,9 @@ public class EnrollmentService {
     }
 
     @Transactional
-    public void cancelByUser(Long id, User currentUser) {
+    public void cancelByUser(Long id, String username) {
+        User currentUser = userRepository.findByEmailOrUsername(username, username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found."));
         Enrollment enrollment = requireEnrollment(id);
 
         if (!enrollment.getUser().getId().equals(currentUser.getId())) {

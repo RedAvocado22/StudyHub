@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/base}">
+      layout:decorate="~{layout/admin}">
 <head>
     <title>Enrollment Details</title>
 </head>
@@ -16,7 +16,8 @@
             </a>
         </div>
 
-        <div class="card shadow-sm" style="max-width: 720px;">
+        <div class="col-lg-8 px-0">
+        <div class="card shadow-sm">
             <div class="card-body p-4">
                 <form th:action="${isNew}
                                  ? @{/admin/enrollments}
@@ -119,6 +120,7 @@
 
                 </form>
             </div>
+        </div>
         </div>
 
     </div>

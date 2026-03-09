@@ -15,6 +15,7 @@ import java.util.Optional;
 
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 
+    @EntityGraph(attributePaths = "course")
     List<Enrollment> findByUserOrderByEnrolledAtDesc(User user);
 
 

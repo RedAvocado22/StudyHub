@@ -2,7 +2,6 @@ package com.studyhub.controller;
 
 import com.studyhub.dto.EnrollmentDTO;
 import com.studyhub.enums.EnrollmentStatus;
-import com.studyhub.repository.CourseRepository;
 import com.studyhub.service.EnrollmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,7 +16,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class AdminEnrollmentController {
 
     private final EnrollmentService enrollmentService;
-    private final CourseRepository courseRepository;
 
     @GetMapping
     public String list(@RequestParam(required = false) Long courseId,
@@ -29,8 +27,7 @@ public class AdminEnrollmentController {
                 enrollmentService.findByFilters(courseId, status, keyword, page, 10);
 
         model.addAttribute("enrollments", enrollmentPage.getContent());
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", enrollmentPage.getTotalPages());
+        model.addAttribute("page", enrollmentPage);
         model.addAttribute("courses", enrollmentService.findAllCourses());
         model.addAttribute("statuses", EnrollmentStatus.values());
         model.addAttribute("selectedCourseId", courseId);

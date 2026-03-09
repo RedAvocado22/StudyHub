@@ -52,13 +52,11 @@
                                class="btn btn-sm btn-success">
                                 <i class="bi bi-play-circle me-1"></i>Access
                             </a>
-                            <form th:case="'PENDING'"
-                                  th:action="@{/my-enrollments/{id}/cancel(id=${e.id})}"
-                                  method="post"
-                                  class="d-inline"
-                                  onsubmit="return confirm('Cancel this enrollment?')">
-                                <button type="submit" class="btn btn-sm btn-outline-danger">Cancel</button>
-                            </form>
+                            <button th:case="'PENDING'"
+                                    type="button"
+                                    class="btn btn-sm btn-outline-danger"
+                                    data-bs-toggle="modal"
+                                    th:attr="data-bs-target='#cancelModal' + ${e.id}">Cancel</button>
                             <span th:case="*" class="text-muted small">View</span>
                         </th:block>
                     </td>
@@ -70,6 +68,16 @@
             </table>
         </div>
 
+        <div th:each="e : ${enrollments}"
+             th:if="${e.status.name() == 'PENDING'}"
+             th:replace="~{fragments/confirm-modal :: confirm-modal(
+                 modalId=${'cancelModal' + e.id},
+                 title='Cancel Enrollment',
+                 message='Are you sure you want to cancel this enrollment?',
+                 formAction=@{/my-enrollments/{id}/cancel(id=${e.id})},
+                 buttonLabel='Cancel Enrollment',
+                 buttonClass='btn-danger')}">
+        </div>
     </div>
 </div>
 </body>

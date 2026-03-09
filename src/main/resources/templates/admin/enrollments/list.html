@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/base}">
+      layout:decorate="~{layout/admin}">
 <head>
     <title>Course Enrollments</title>
 </head>
@@ -92,13 +92,11 @@
                                class="btn btn-sm btn-outline-primary">
                                 <i class="bi bi-pencil"></i>
                             </a>
-                            <form th:action="@{/admin/enrollments/{id}/delete(id=${e.id})}"
-                                  method="post" class="d-inline"
-                                  onsubmit="return confirm('Delete this enrollment?')">
-                                <button type="submit" class="btn btn-sm btn-outline-danger">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </form>
+                            <button type="button" class="btn btn-sm btn-outline-danger"
+                                    data-bs-toggle="modal"
+                                    th:attr="data-bs-target='#deleteModal' + ${e.id}">
+                                <i class="bi bi-trash"></i>
+                            </button>
                         </div>
                     </td>
                 </tr>
@@ -109,21 +107,19 @@
             </table>
         </div>
 
-        <nav th:if="${totalPages > 1}">
-            <ul class="pagination pagination-sm">
-                <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-                    class="page-item"
-                    th:classappend="${i == currentPage} ? ' active'">
-                    <a class="page-link"
-                       th:href="@{/templates/admin/enrollments(page=${i},
-                                  courseId=${selectedCourseId},
-                                  status=${selectedStatus},
-                                  keyword=${keyword})}"
-                       th:text="${i + 1}">
-                    </a>
-                </li>
-            </ul>
-        </nav>
+        <div th:with="queryString='&courseId=' + (${selectedCourseId} ?: '') + '&status=' + (${selectedStatus} ?: '') + '&keyword=' + (${keyword} ?: '') + '&size=10'"
+             th:replace="~{fragments/pagination :: pagination(page=${page}, baseUrl='/admin/enrollments', queryString=${queryString})}">
+        </div>
+
+        <div th:each="e : ${enrollments}"
+             th:replace="~{fragments/confirm-modal :: confirm-modal(
+                 modalId=${'deleteModal' + e.id},
+                 title='Delete Enrollment',
+                 message='Are you sure you want to delete this enrollment?',
+                 formAction=@{/admin/enrollments/{id}/delete(id=${e.id})},
+                 buttonLabel='Delete',
+                 buttonClass='btn-danger')}">
+        </div>
 
     </div>
 </div>
