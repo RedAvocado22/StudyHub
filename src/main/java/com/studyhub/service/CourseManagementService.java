@@ -3,6 +3,8 @@ package com.studyhub.service;
 import com.studyhub.dto.CourseCardDTO;
 import com.studyhub.dto.CourseDetailDTO;
 import com.studyhub.dto.CourseListDTO;
+import com.studyhub.dto.SettingListItemDTO;
+import com.studyhub.dto.UserListDTO;
 import com.studyhub.enums.CourseLevel;
 import com.studyhub.enums.UserRole;
 import com.studyhub.model.Course;
@@ -26,6 +28,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import static org.springframework.util.StringUtils.hasText;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -37,6 +41,29 @@ public class CourseManagementService {
 
     public List<CourseCardDTO> getFeaturedCourses() {
         return courseRepository.findTop6ByPublishedTrueOrderByCreatedAtDesc()
+                .stream()
+                .map(this::toCourseCardDTO)
+                .toList();
+    }
+
+    public List<CourseCardDTO> getAllActiveCoursesSortedByName() {
+        return courseRepository.findByPublishedTrueOrderByTitleAsc()
+                .stream()
+                .map(this::toCourseCardDTO)
+                .toList();
+    }
+
+    public List<CourseCardDTO> searchActiveCoursesSortedByName(String keyword) {
+        if (!hasText(keyword)) {
+            return getAllActiveCoursesSortedByName();
+        }
+
+        String normalizedKeyword = keyword.trim();
+        return courseRepository
+                .findByPublishedTrueAndTitleContainingIgnoreCaseOrPublishedTrueAndDescriptionContainingIgnoreCaseOrderByTitleAsc(
+                        normalizedKeyword,
+                        normalizedKeyword
+                )
                 .stream()
                 .map(this::toCourseCardDTO)
                 .toList();
@@ -80,12 +107,18 @@ public class CourseManagementService {
                 .orElseThrow(() -> new NoSuchElementException("Course not found"));
     }
 
-    public List<Setting> getCategories() {
-        return settingRepository.findByType_Name("Course Category");
+    public List<SettingListItemDTO> getCategories() {
+        return settingRepository.findByType_Name("Course Category")
+                .stream()
+                .map(s -> new SettingListItemDTO(s.getId(), s.getName(), null, s.getValue(), s.getPriority(), s.getStatus()))
+                .toList();
     }
 
-    public List<User> getManagers() {
-        return userRepository.findByRole(UserRole.MANAGER);
+    public List<UserListDTO> getManagers() {
+        return userRepository.findByRole(UserRole.MANAGER)
+                .stream()
+                .map(u -> UserListDTO.builder().id(u.getId()).fullName(u.getFullName()).build())
+                .toList();
     }
 
     private CourseListDTO toCourseListDTO(Course c) {
