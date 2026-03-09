@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>My Enrollments</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container py-4">
+
+        <h4 class="fw-bold mb-4">My Enrollments</h4>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th>Id</th>
+                    <th>Course</th>
+                    <th>User Info</th>
+                    <th>Enrolled At</th>
+                    <th>Fee($)</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="e : ${enrollments}">
+                    <td th:text="${e.id}"></td>
+                    <td th:text="${e.courseTitle}"></td>
+                    <td>
+                        <div th:text="${e.fullName}"></div>
+                        <small class="text-muted" th:text="${e.email}"></small>
+                    </td>
+                    <td>
+                        <small th:text="${#temporals.format(e.enrolledAt, 'yyyy-MM-dd HH:mm:ss')}"></small>
+                    </td>
+                    <td th:text="${e.fee}"></td>
+                    <td>
+                        <span th:text="${e.status}"
+                              th:class="${e.status.name() == 'APPROVED'}
+                                         ? 'badge bg-success'
+                                         : (${e.status.name() == 'REJECTED'}
+                                            ? 'badge bg-danger'
+                                            : 'badge bg-warning text-dark')">
+                        </span>
+                    </td>
+                    <td>
+                        <th:block th:switch="${e.status.name()}">
+                            <a th:case="'APPROVED'"
+                               th:href="@{/courses/{id}(id=${e.courseId})}"
+                               class="btn btn-sm btn-success">
+                                <i class="bi bi-play-circle me-1"></i>Access
+                            </a>
+                            <button th:case="'PENDING'"
+                                    type="button"
+                                    class="btn btn-sm btn-outline-danger"
+                                    data-bs-toggle="modal"
+                                    th:attr="data-bs-target='#cancelModal' + ${e.id}">Cancel</button>
+                            <span th:case="*" class="text-muted small">View</span>
+                        </th:block>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(enrollments)}">
+                    <td colspan="7" class="text-center text-muted py-4">You have no enrollments yet.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div th:each="e : ${enrollments}"
+             th:if="${e.status.name() == 'PENDING'}"
+             th:replace="~{fragments/confirm-modal :: confirm-modal(
+                 modalId=${'cancelModal' + e.id},
+                 title='Cancel Enrollment',
+                 message='Are you sure you want to cancel this enrollment?',
+                 formAction=@{/my-enrollments/{id}/cancel(id=${e.id})},
+                 buttonLabel='Cancel Enrollment',
+                 buttonClass='btn-danger')}">
+        </div>
+    </div>
+</div>
+</body>
+</html>
