@@ -3,93 +3,111 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/admin}">
 <head>
-    <title th:text="${isNew} ? 'New Setting' : 'Edit Setting'">Setting Details</title>
+    <title th:text="${isNew} ? 'New Setting' : 'Edit Setting'"></title>
 </head>
 <body>
 <div layout:fragment="content">
-    <section class="py-4">
-        <div class="container">
-            <h2 class="fw-bold mb-4">Setting Details</h2>
 
+    <div class="d-flex align-items-center gap-2 mb-4">
+        <a th:href="@{/admin/settings}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Back
+        </a>
+        <h4 class="fw-bold mb-0" th:text="${isNew} ? 'New Setting' : 'Edit Setting'"></h4>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
             <form th:action="${isNew} ? @{/admin/settings/new} : @{/admin/settings/{id}(id=${settingId})}"
                   th:object="${settingDTO}"
-                  method="post"
-                  class="row g-3">
+                  method="post">
 
-                <div class="col-md-6">
-                    <label class="form-label" for="name">Name <span class="text-danger">*</span></label>
-                    <input id="name"
-                           type="text"
-                           th:field="*{name}"
-                           class="form-control"
-                           th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'">
-                    <div class="invalid-feedback" th:errors="*{name}"></div>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold small text-muted" for="name">Name <span class="text-danger">*</span></label>
+                        <input id="name"
+                               type="text"
+                               th:field="*{name}"
+                               class="form-control"
+                               th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'"
+                               placeholder="e.g. Java Programming">
+                        <div class="invalid-feedback" th:errors="*{name}"></div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold small text-muted" for="typeId">Type <span class="text-danger">*</span></label>
+                        <select id="typeId"
+                                th:field="*{typeId}"
+                                class="form-select"
+                                th:classappend="${#fields.hasErrors('typeId')} ? 'is-invalid'">
+                            <option value="">Select type</option>
+                            <option th:each="type : ${typeOptions}"
+                                    th:value="${type.id}"
+                                    th:text="${type.name}"></option>
+                        </select>
+                        <div class="invalid-feedback" th:errors="*{typeId}"></div>
+                    </div>
                 </div>
 
-                <div class="col-md-6">
-                    <label class="form-label" for="typeId">Type <span class="text-danger">*</span></label>
-                    <select id="typeId"
-                            th:field="*{typeId}"
-                            class="form-select"
-                            th:classappend="${#fields.hasErrors('typeId')} ? 'is-invalid'">
-                        <option value="">Select type</option>
-                        <option th:each="type : ${typeOptions}"
-                                th:value="${type.id}"
-                                th:text="${type.name}"></option>
-                    </select>
-                    <div class="invalid-feedback" th:errors="*{typeId}"></div>
-                </div>
-
-                <div class="col-12">
-                    <label class="form-label" for="value">Value</label>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small text-muted" for="value">Value</label>
                     <input id="value"
                            type="text"
                            th:field="*{value}"
                            class="form-control"
-                           th:classappend="${#fields.hasErrors('value')} ? 'is-invalid'">
+                           th:classappend="${#fields.hasErrors('value')} ? 'is-invalid'"
+                           placeholder="Enter setting value">
                     <div class="invalid-feedback" th:errors="*{value}"></div>
                 </div>
 
-                <div class="col-md-6">
-                    <label class="form-label" for="priority">Priority <span class="text-danger">*</span></label>
-                    <input id="priority"
-                           type="number"
-                           th:field="*{priority}"
-                           class="form-control"
-                           th:classappend="${#fields.hasErrors('priority')} ? 'is-invalid'">
-                    <div class="invalid-feedback" th:errors="*{priority}"></div>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold small text-muted" for="priority">Priority <span class="text-danger">*</span></label>
+                        <input id="priority"
+                               type="number"
+                               th:field="*{priority}"
+                               class="form-control"
+                               th:classappend="${#fields.hasErrors('priority')} ? 'is-invalid'"
+                               placeholder="e.g. 1">
+                        <div class="invalid-feedback" th:errors="*{priority}"></div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold small text-muted d-block">Status <span class="text-danger">*</span></label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" th:field="*{status}" id="statusActive" value="ACTIVE" required>
+                            <label class="btn btn-sm btn-outline-success" for="statusActive">Active</label>
+
+                            <input type="radio" class="btn-check" th:field="*{status}" id="statusInactive" value="INACTIVE" required>
+                            <label class="btn btn-sm btn-outline-secondary" for="statusInactive">Inactive</label>
+                        </div>
+                        <div class="text-danger small mt-1" th:errors="*{status}"></div>
+                    </div>
                 </div>
 
-                <div class="col-md-6">
-                    <label class="form-label d-block">Status <span class="text-danger">*</span></label>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" th:field="*{status}" id="statusActive" value="ACTIVE">
-                        <label class="form-check-label" for="statusActive">Active</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" th:field="*{status}" id="statusInactive" value="INACTIVE">
-                        <label class="form-check-label" for="statusInactive">Inactive</label>
-                    </div>
-                    <div class="text-danger small" th:errors="*{status}"></div>
-                </div>
-
-                <div class="col-12">
-                    <label class="form-label" for="description">Description</label>
+                <div class="mb-4">
+                    <label class="form-label fw-semibold small text-muted" for="description">Description</label>
                     <textarea id="description"
                               th:field="*{description}"
                               rows="4"
                               class="form-control"
-                              th:classappend="${#fields.hasErrors('description')} ? 'is-invalid'"></textarea>
+                              th:classappend="${#fields.hasErrors('description')} ? 'is-invalid'"
+                              placeholder="Enter description..."></textarea>
                     <div class="invalid-feedback" th:errors="*{description}"></div>
                 </div>
 
-                <div class="col-12 d-flex gap-2 mt-2">
-                    <button type="submit" class="btn btn-primary">Submit</button>
+                <hr class="text-muted opacity-25">
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn px-4"
+                            th:classappend="${isNew} ? 'btn-success' : 'btn-primary'">
+                        <i class="bi bi-check-lg me-1"></i>
+                        <span th:text="${isNew} ? 'Create Setting' : 'Save Changes'"></span>
+                    </button>
                     <a th:href="@{/admin/settings}" class="btn btn-outline-secondary">Cancel</a>
                 </div>
             </form>
         </div>
-    </section>
+    </div>
 </div>
 </body>
 </html>

@@ -2,8 +2,8 @@ package com.studyhub.controller;
 
 import com.studyhub.dto.SettingUpsertDTO;
 import com.studyhub.enums.SettingStatus;
-import com.studyhub.model.Setting;
 import com.studyhub.service.SettingService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -23,6 +23,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class AdminSettingController {
 
     private final SettingService settingService;
+
+    @ModelAttribute
+    public void exposeRequestUri(HttpServletRequest request, Model model) {
+        model.addAttribute("requestURI", request.getRequestURI());
+    }
 
     @GetMapping
     public String listSettings(@RequestParam(required = false) String type,

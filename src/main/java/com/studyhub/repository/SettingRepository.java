@@ -29,8 +29,6 @@ public interface SettingRepository extends JpaRepository<Setting, Long>, JpaSpec
     @EntityGraph(attributePaths = "type")
     Optional<Setting> findWithTypeById(Long id);
 
-public interface SettingRepository extends JpaRepository<Setting, Long> {
-
     long countByType_Name(String typeName);
 
     List<Setting> findByType_Name(String typeName);

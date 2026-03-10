@@ -3,7 +3,7 @@
 <body>
 
 <div th:fragment="confirm-modal(modalId, title, message, formAction, buttonLabel, buttonClass)"
-     class="modal fade" th:id="${modalId}" tabindex="-1" aria-modal="true" role="dialog">
+     class="modal fade" th:id="${modalId}" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
             <div class="modal-header">

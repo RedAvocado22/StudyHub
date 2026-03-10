@@ -49,21 +49,26 @@ public class AdminController {
             @RequestParam(defaultValue = "") String search,
             @RequestParam(required = false) UserRole role,
             @RequestParam(required = false) UserStatus status,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             Model model) {
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Sort sort = direction.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(page, size, sort);
         Long currentUserId = principal.getUser().getId();
 
         model.addAttribute("users", userManagementService.findAll(currentUserId, search, role, status, pageable));
         model.addAttribute("search", search);
         model.addAttribute("selectedRole", role);
         model.addAttribute("selectedStatus", status);
+        model.addAttribute("sortBy", sortBy);
+        model.addAttribute("direction", direction);
         model.addAttribute("size", size);
         model.addAttribute("roles", UserRole.values());
         model.addAttribute("statuses", UserStatus.values());
-        model.addAttribute("queryString", buildQueryString(search, role, status, size));
+        model.addAttribute("queryString", buildQueryString(search, role, status, sortBy, direction, size));
         return "admin/users/list";
     }
 
@@ -144,11 +149,14 @@ public class AdminController {
             @RequestParam(required = false) Long managerId,
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             Model model) {
 
-        var pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Sort sort = direction.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        var pageable = PageRequest.of(page, size, sort);
         model.addAttribute("courses", courseManagementService.findAll(search, categoryId, managerId, minPrice, maxPrice, pageable));
         model.addAttribute("categories", courseManagementService.getCategories());
         model.addAttribute("managers", courseManagementService.getManagers());
@@ -157,8 +165,10 @@ public class AdminController {
         model.addAttribute("selectedManager", managerId);
         model.addAttribute("minPrice", minPrice);
         model.addAttribute("maxPrice", maxPrice);
+        model.addAttribute("sortBy", sortBy);
+        model.addAttribute("direction", direction);
         model.addAttribute("size", size);
-        model.addAttribute("queryString", buildCourseQueryString(search, categoryId, managerId, minPrice, maxPrice, size));
+        model.addAttribute("queryString", buildCourseQueryString(search, categoryId, managerId, minPrice, maxPrice, sortBy, direction, size));
         return "admin/courses/list";
     }
 
@@ -171,23 +181,28 @@ public class AdminController {
         return "admin/courses/detail";
     }
 
-    private String buildQueryString(String search, UserRole role, UserStatus status, int size) {
+    private String buildQueryString(String search, UserRole role, UserStatus status, String sortBy, String direction, int size) {
         StringBuilder sb = new StringBuilder();
         if (search != null && !search.isBlank()) sb.append("&search=").append(search);
         if (role != null) sb.append("&role=").append(role);
         if (status != null) sb.append("&status=").append(status);
+        if (sortBy != null) sb.append("&sortBy=").append(sortBy);
+        if (direction != null) sb.append("&direction=").append(direction);
         sb.append("&size=").append(size);
         return sb.toString();
     }
 
     private String buildCourseQueryString(String search, Long categoryId, Long managerId,
-                                           BigDecimal minPrice, BigDecimal maxPrice, int size) {
+                                           BigDecimal minPrice, BigDecimal maxPrice,
+                                           String sortBy, String direction, int size) {
         StringBuilder sb = new StringBuilder();
         if (search != null && !search.isBlank()) sb.append("&search=").append(search);
         if (categoryId != null) sb.append("&categoryId=").append(categoryId);
         if (managerId != null) sb.append("&managerId=").append(managerId);
         if (minPrice != null) sb.append("&minPrice=").append(minPrice);
         if (maxPrice != null) sb.append("&maxPrice=").append(maxPrice);
+        if (sortBy != null) sb.append("&sortBy=").append(sortBy);
+        if (direction != null) sb.append("&direction=").append(direction);
         sb.append("&size=").append(size);
         return sb.toString();
     }

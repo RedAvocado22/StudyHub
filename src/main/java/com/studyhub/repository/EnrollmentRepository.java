@@ -34,7 +34,6 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
             OR LOWER(e.email)    LIKE LOWER(CONCAT('%', :keyword, '%'))
             OR LOWER(c.title)    LIKE LOWER(CONCAT('%', :keyword, '%'))
           )
-        ORDER BY e.enrolledAt DESC
     """,
             countQuery = """
         SELECT COUNT(e) FROM Enrollment e
