@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>User Profile</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container">
+        <div class="h2 mt-5 mb-3">
+            <a href="#"
+               class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">
+                User Profile
+            </a>
+            <a href="#"
+               class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover ms-2">
+                Password Change
+            </a>
+        </div>
+        <form th:action="@{/profile}" th:object="${user}" method="post" enctype="multipart/form-data">
+            <div class="row">
+                <div class="col">
+                    <div class="container mt-3">
+                        <div>
+                            <img th:src="${user.profileImage}"
+                                 class="img-thumbnail mx-auto d-block" alt="Avatar">
+                            <div class="h5 text-center" th:text="${user.email}"></div>
+                        </div>
+                        <div class="mx-auto text-center">
+                            <div>
+                                <label for="fileUpload" class="btn btn-sm btn-outline-primary">Choose other image</label>
+                                <input type="file" id="fileUpload" name="imageFile" accept="image/*" hidden>
+                                <div class="lead">Accept PNG,JPG,GIF,Max 5 Mb</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <input type="hidden" th:field="*{id}">
+                    <label for="l1" class="form-label">Full Name*</label>
+                    <input type="text" th:field="*{fullName}" class="form-control" placeholder="Full Name" id="l1">
+                    <label for="l2" class="form-label">Mobile</label>
+                    <input type="text" th:field="*{mobile}" class="form-control" placeholder="Mobile" id="l2">
+                    <label for="l3" class="form-label">Username*</label>
+                    <input type="text" th:field="*{username}" class="form-control" placeholder="Username" id="l3">
+                    <label for="l4" class="form-label">Role</label>
+                    <select class="form-select" th:field="*{role}" id="l4">
+                        <option th:each="r : ${roles}" th:value="${r}" th:text="${r}"></option>
+                    </select>
+                    <button type="submit" class="btn btn-primary mb-3 mt-3">Submit</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

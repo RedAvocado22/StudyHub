@@ -30,6 +30,8 @@ public class User {
 
     private String mobile;
 
+    @Lob
+    @Column(length = 2147483647)
     private String profileImage;
 
     @Enumerated(EnumType.STRING)
