@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin}">
+<head><title>Course Management</title></head>
+<body>
+<div layout:fragment="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="fw-bold mb-0">Course Management</h4>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+            <form th:action="@{/admin/courses}" method="get" class="row g-2 align-items-end">
+                <input type="hidden" name="sortBy" th:value="${sortBy}">
+                <input type="hidden" name="direction" th:value="${direction}">
+                <div class="col-12 col-md-3">
+                    <label class="form-label small text-muted mb-1">Course Name</label>
+                    <input type="text" name="search" class="form-control form-control-sm"
+                           placeholder="Search by title" th:value="${search}">
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small text-muted mb-1">Category</label>
+                    <select name="categoryId" class="form-select form-select-sm">
+                        <option value="">All Categories</option>
+                        <option th:each="c : ${categories}"
+                                th:value="${c.id}"
+                                th:text="${c.name}"
+                                th:selected="${c.id == selectedCategory}"></option>
+                    </select>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small text-muted mb-1">Manager</label>
+                    <select name="managerId" class="form-select form-select-sm">
+                        <option value="">All Managers</option>
+                        <option th:each="m : ${managers}"
+                                th:value="${m.id}"
+                                th:text="${m.fullName}"
+                                th:selected="${m.id == selectedManager}"></option>
+                    </select>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small text-muted mb-1">Min Price</label>
+                    <input type="number" name="minPrice" class="form-control form-control-sm"
+                           placeholder="0" th:value="${minPrice}" min="0" step="1000">
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small text-muted mb-1">Max Price</label>
+                    <input type="number" name="maxPrice" class="form-control form-control-sm"
+                           placeholder="Any" th:value="${maxPrice}" min="0" step="1000">
+                </div>
+                <input type="hidden" name="size" th:value="${size}">
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="bi bi-search me-1"></i>Filter
+                    </button>
+                    <a th:href="@{/admin/courses}" class="btn btn-outline-secondary btn-sm ms-1">Reset</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3"><a class="text-decoration-none text-dark small fw-bold" th:href="@{/admin/courses(search=${search},categoryId=${selectedCategory},managerId=${selectedManager},minPrice=${minPrice},maxPrice=${maxPrice},sortBy='title',direction=${sortBy == 'title' and direction == 'asc' ? 'desc' : 'asc'})}">Title <i class="bi bi-arrow-down-up ms-1"></i></a></th>
+                            <th>Category</th>
+                            <th>Manager</th>
+                            <th><a class="text-decoration-none text-dark small fw-bold" th:href="@{/admin/courses(search=${search},categoryId=${selectedCategory},managerId=${selectedManager},minPrice=${minPrice},maxPrice=${maxPrice},sortBy='level',direction=${sortBy == 'level' and direction == 'asc' ? 'desc' : 'asc'})}">Level <i class="bi bi-arrow-down-up ms-1"></i></a></th>
+                            <th><a class="text-decoration-none text-dark small fw-bold" th:href="@{/admin/courses(search=${search},categoryId=${selectedCategory},managerId=${selectedManager},minPrice=${minPrice},maxPrice=${maxPrice},sortBy='price',direction=${sortBy == 'price' and direction == 'asc' ? 'desc' : 'asc'})}">Price <i class="bi bi-arrow-down-up ms-1"></i></a></th>
+                            <th><a class="text-decoration-none text-dark small fw-bold" th:href="@{/admin/courses(search=${search},categoryId=${selectedCategory},managerId=${selectedManager},minPrice=${minPrice},maxPrice=${maxPrice},sortBy='durationHours',direction=${sortBy == 'durationHours' and direction == 'asc' ? 'desc' : 'asc'})}">Duration <i class="bi bi-arrow-down-up ms-1"></i></a></th>
+                            <th>Status</th>
+                            <th><a class="text-decoration-none text-dark small fw-bold" th:href="@{/admin/courses(search=${search},categoryId=${selectedCategory},managerId=${selectedManager},minPrice=${minPrice},maxPrice=${maxPrice},sortBy='createdAt',direction=${sortBy == 'createdAt' and direction == 'asc' ? 'desc' : 'asc'})}">Created <i class="bi bi-arrow-down-up ms-1"></i></a></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${courses.empty}">
+                            <td colspan="9" class="text-center text-muted py-4">No courses found.</td>
+                        </tr>
+                        <tr th:each="c : ${courses.content}">
+                            <td class="ps-3 fw-semibold" th:text="${c.title}"></td>
+                            <td class="text-muted small" th:text="${c.categoryName}"></td>
+                            <td class="text-muted small" th:text="${c.managerName}"></td>
+                            <td>
+                                <span class="badge rounded-pill"
+                                      th:text="${c.level}"
+                                      th:classappend="${c.level.name() == 'BEGINNER'} ? 'bg-success'
+                                                   : (${c.level.name() == 'INTERMEDIATE'} ? 'bg-warning text-dark'
+                                                   : 'bg-danger')">
+                                </span>
+                            </td>
+                            <td class="text-muted small"
+                                th:text="${#numbers.formatDecimal(c.price, 0, 'COMMA', 0, 'POINT') + ' ₫'}"></td>
+                            <td class="text-muted small"
+                                th:text="${c.durationHours + 'h'}"></td>
+                            <td>
+                                <span th:if="${c.published}" class="badge bg-success rounded-pill">Published</span>
+                                <span th:unless="${c.published}" class="badge bg-secondary rounded-pill">Draft</span>
+                            </td>
+                            <td class="text-muted small"
+                                th:text="${#temporals.format(c.createdAt, 'dd/MM/yyyy')}"></td>
+                            <td>
+                                <a th:href="@{/admin/courses/{id}(id=${c.id})}"
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer bg-transparent" th:if="${courses.totalPages > 1}">
+            <div th:replace="~{fragments/pagination :: pagination(page=${courses}, baseUrl='/admin/courses', queryString=${queryString})}"></div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

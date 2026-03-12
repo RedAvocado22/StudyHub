@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="confirm-modal(modalId, title, message, formAction, buttonLabel, buttonClass)"
+     class="modal fade" th:id="${modalId}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header">
+                <h5 class="modal-title fw-semibold" th:text="${title}"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-muted" th:text="${message}"></div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form th:action="${formAction}" method="post" class="d-inline">
+                    <button type="submit" class="btn" th:classappend="${buttonClass}"
+                            th:text="${buttonLabel}"></button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -41,13 +41,15 @@ public class SecurityConfig {
                 .requestMatchers("/admin/settings/**", "/admin/users/**")
                     .hasAuthority("ADMIN")
                 .requestMatchers("/admin/posts/**")
-                    .hasAnyAuthority("ADMIN", "MARKETING")
+                    .hasAnyAuthority("ADMIN", "MEMBER")
+                .requestMatchers("/admin/enrollments/**")
+                    .hasAnyAuthority("ADMIN", "MANAGER")
                 .requestMatchers("/admin/**")
                     .hasAnyAuthority("ADMIN", "MANAGER")
                 .requestMatchers(
                     "/profile/**", "/my-enrollments/**",
                     "/my-courses/**", "/learn/**", "/change-password"
-                ).hasAnyAuthority("ADMIN", "MANAGER", "MARKETING", "MEMBER")
+                ).hasAnyAuthority("ADMIN", "MANAGER", "MEMBER")
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form

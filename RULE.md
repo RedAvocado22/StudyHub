@@ -31,6 +31,7 @@
 | `PostService` | CRUD posts, publish/hide |
 | `BlogService` | Public blog list, blog details, comments |
 | `EmailService` | All outbound email — used by other services, never by controllers |
+| `FileUploadService` | Save/delete uploaded files (images + documents) |
 
 ## Code Style
 - Use Lombok: `@RequiredArgsConstructor` + `final` fields for injection everywhere.
@@ -149,12 +150,94 @@ Do not add duplicate messages for these events — they are already handled.
 
 Add new entities at the bottom of the appropriate `seed*` method in `DataSeeder`. Keep consistent with the patterns already used (builder, no manual IDs, use saved references for FK relationships).
 
+## File Uploads (`FileUploadService`)
+
+- Use `uploadImage(MultipartFile)` for avatars and thumbnails.
+  - Accepted: `image/jpeg`, `image/png`, `image/gif`, `image/webp`. Max **10 MB**.
+- Use `uploadDocument(MultipartFile)` for PDFs and Office files.
+  - Accepted: `.pdf`, `.doc`, `.docx`, `.xls`, `.xlsx`. Max **10 MB**.
+- Both methods return a URL string (e.g. `/uploads/images/uuid.jpg`). Store this directly in the entity field.
+- Call `delete(oldUrl)` before replacing an existing file to remove the old one from disk.
+- Never handle file I/O in controllers or repositories. Always delegate to `FileUploadService`.
+- Forms that upload files must have `enctype="multipart/form-data"` and use `<input type="file" name="...">`.
+
+### Controller example
+```java
+@PostMapping("/profile/avatar")
+public String uploadAvatar(@RequestParam MultipartFile avatar,
+                           @AuthenticationPrincipal StudyHubUserDetails principal,
+                           RedirectAttributes redirectAttributes) {
+    try {
+        String url = fileUploadService.uploadImage(avatar);
+        userProfileService.updateAvatar(principal.getUser().getId(), url);
+        redirectAttributes.addFlashAttribute("successMessage", "Avatar updated.");
+    } catch (IllegalArgumentException e) {
+        redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+    }
+    return "redirect:/profile";
+}
+```
+
+## Reusable Fragments
+
+### Toast (`fragments/toast.html`)
+Included automatically in `layout/base.html` and `layout/admin.html`. Trigger from any controller:
+```java
+redirectAttributes.addFlashAttribute("successMessage", "Done!");
+redirectAttributes.addFlashAttribute("errorMessage", "Failed.");
+redirectAttributes.addFlashAttribute("infoMessage", "Note.");
+```
+
+### Pagination (`fragments/pagination.html`)
+```html
+<div th:replace="~{fragments/pagination :: pagination(
+    page=${users},
+    baseUrl='/admin/users',
+    queryString=${queryString})}">
+</div>
+```
+- `page` — Spring `Page<?>` object from the service.
+- `baseUrl` — path without query params.
+- `queryString` — all active filter params as a string, each prefixed with `&`, plus `&size=N`. Do **not** include `&page=`. Build this in the controller and pass it via the model.
+
+```java
+// Controller example
+private String buildQueryString(String search, UserRole role, int size) {
+    StringBuilder sb = new StringBuilder();
+    if (search != null && !search.isBlank()) sb.append("&search=").append(search);
+    if (role != null) sb.append("&role=").append(role);
+    sb.append("&size=").append(size);
+    return sb.toString();
+}
+```
+
+### Confirm Modal (`fragments/confirm-modal.html`)
+Include the modal on the page, then point a trigger button at it:
+```html
+<!-- 1. Include the modal (once per action per page) -->
+<div th:replace="~{fragments/confirm-modal :: confirm-modal(
+    modalId='deleteUser',
+    title='Delete User',
+    message='This action cannot be undone. Are you sure?',
+    formAction=@{/admin/users/{id}/delete(id=${user.id})},
+    buttonLabel='Delete',
+    buttonClass='btn-danger')}">
+</div>
+
+<!-- 2. Trigger button (anywhere on the page) -->
+<button class="btn btn-danger btn-sm"
+        data-bs-toggle="modal" data-bs-target="#deleteUser">
+    Delete
+</button>
+```
+
 ## UI
 - **Bootstrap 5** for all styling. No raw `style=""` attributes.
 - **Thymeleaf Layout Dialect**: every page extends a layout using `layout:decorate`.
   - Auth pages (login, register, forgot/reset password) → `layout:decorate="~{layout/auth}"`
+  - Admin pages → `layout:decorate="~{layout/admin}"`
   - All other pages → `layout:decorate="~{layout/base}"`
-- Header, footer, and sidebar stay in `fragments/` and are included via `th:replace`.
+- Header, footer, sidebar, toast, pagination, and confirm-modal stay in `fragments/` and are included via `th:replace`.
 - Page content goes inside `<div layout:fragment="content">`.
 
 ## Commit Messages

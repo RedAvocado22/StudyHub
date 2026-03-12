@@ -42,6 +42,11 @@
                             <i class="bi bi-book me-2"></i>My Courses
                         </a>
                     </li>
+                    <li sec:authorize="hasAnyAuthority('ADMIN','MANAGER','MEMBER')">
+                        <a class="dropdown-item" th:href="@{/my-enrollments}">
+                            <i class="bi bi-person-check me-2"></i>My Enrollments
+                        </a>
+                    </li>
                     <li>
                         <a class="dropdown-item" th:href="@{/profile}">
                             <i class="bi bi-person me-2"></i>User Profile
