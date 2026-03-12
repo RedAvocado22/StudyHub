@@ -18,6 +18,8 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     @EntityGraph(attributePaths = "course")
     List<Enrollment> findByUserOrderByEnrolledAtDesc(User user);
 
+    @EntityGraph(attributePaths = "course")
+    List<Enrollment> findByUserAndStatusOrderByEnrolledAtDesc(User user, EnrollmentStatus status);
 
     Optional<Enrollment> findById(Long id);
 
@@ -51,7 +53,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     Page<Enrollment> findByFilters(
             @Param("courseId") Long courseId,
             @Param("status") EnrollmentStatus status,
-            @Param("keyword")  String keyword,
+            @Param("keyword") String keyword,
             Pageable pageable
     );
 }

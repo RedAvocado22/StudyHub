@@ -20,7 +20,6 @@
                     <th>User Info</th>
                     <th>Enrolled At</th>
                     <th>Fee($)</th>
-                    <th>Status</th>
                     <th>Actions</th>
                 </tr>
                 </thead>
@@ -37,28 +36,10 @@
                     </td>
                     <td th:text="${e.fee}"></td>
                     <td>
-                        <span th:text="${e.status}"
-                              th:class="${e.status.name() == 'APPROVED'}
-                                         ? 'badge bg-success'
-                                         : (${e.status.name() == 'REJECTED'}
-                                            ? 'badge bg-danger'
-                                            : 'badge bg-warning text-dark')">
-                        </span>
-                    </td>
-                    <td>
-                        <th:block th:switch="${e.status.name()}">
-                            <a th:case="'APPROVED'"
-                               th:href="@{/courses/{id}(id=${e.courseId})}"
-                               class="btn btn-sm btn-success">
-                                <i class="bi bi-play-circle me-1"></i>Access
-                            </a>
-                            <button th:case="'PENDING'"
-                                    type="button"
-                                    class="btn btn-sm btn-outline-danger"
-                                    data-bs-toggle="modal"
-                                    th:attr="data-bs-target='#cancelModal' + ${e.id}">Cancel</button>
-                            <span th:case="*" class="text-muted small">View</span>
-                        </th:block>
+                        <a th:href="@{/courses/{id}(id=${e.courseId})}"
+                           class="btn btn-sm btn-success">
+                            <i class="bi bi-play-circle me-1"></i>Access
+                        </a>
                     </td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(enrollments)}">
@@ -68,16 +49,6 @@
             </table>
         </div>
 
-        <div th:each="e : ${enrollments}"
-             th:if="${e.status.name() == 'PENDING'}"
-             th:replace="~{fragments/confirm-modal :: confirm-modal(
-                 modalId=${'cancelModal' + e.id},
-                 title='Cancel Enrollment',
-                 message='Are you sure you want to cancel this enrollment?',
-                 formAction=@{/my-enrollments/{id}/cancel(id=${e.id})},
-                 buttonLabel='Cancel Enrollment',
-                 buttonClass='btn-danger')}">
-        </div>
     </div>
 </div>
 </body>
