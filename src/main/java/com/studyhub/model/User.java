@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -52,6 +53,11 @@ public class User {
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "author",cascade = CascadeType.ALL)
+    @Singular
+    @ToString.Exclude
+    private List<Post> posts;
 
     @PrePersist
     protected void onCreate() {
