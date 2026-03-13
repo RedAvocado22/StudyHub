@@ -10,16 +10,16 @@
 <div layout:fragment="content">
     <div class="container">
         <div class="h2 mt-5 mb-3">
-            <a href="#"
+            <a th:href="@{/profile}"
                class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">
                 User Profile
             </a>
-            <a href="#"
+            <a th:href="@{/change-password}"
                class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover ms-2">
                 Password Change
             </a>
         </div>
-        <form th:action="@{/profile}" th:object="${user}" method="post" enctype="multipart/form-data">
+        <form th:action="@{/profile}" th:object="${userProfileDTO}" method="post" enctype="multipart/form-data">
             <div class="row">
                 <div class="col">
                     <div class="container mt-3">
@@ -38,13 +38,28 @@
                     </div>
                 </div>
                 <div class="col">
-                    <input type="hidden" th:field="*{id}">
+                    <!-- Thông báo lỗi tổng quát (nếu có) -->
+                    <div th:if="${#fields.hasAnyErrors()}" class="alert alert-danger">
+                        Vui lòng sửa các lỗi bên dưới!
+                    </div>
                     <label for="l1" class="form-label">Full Name*</label>
                     <input type="text" th:field="*{fullName}" class="form-control" placeholder="Full Name" id="l1">
+                    <div th:if="${#fields.hasErrors('fullName')}"
+                       th:errors="*{fullName}"
+                        class="text-danger">
+                    </div>
                     <label for="l2" class="form-label">Mobile</label>
                     <input type="text" th:field="*{mobile}" class="form-control" placeholder="Mobile" id="l2">
+                    <div th:if="${#fields.hasErrors('mobile')}"
+                         th:errors="*{mobile}"
+                         class="text-danger">
+                    </div>
                     <label for="l3" class="form-label">Username*</label>
                     <input type="text" th:field="*{username}" class="form-control" placeholder="Username" id="l3">
+                    <div th:if="${#fields.hasErrors('username')}"
+                         th:errors="*{username}"
+                         class="text-danger">
+                    </div>
                     <label for="l4" class="form-label">Role</label>
                     <select class="form-select" th:field="*{role}" id="l4">
                         <option th:each="r : ${roles}" th:value="${r}" th:text="${r}"></option>
