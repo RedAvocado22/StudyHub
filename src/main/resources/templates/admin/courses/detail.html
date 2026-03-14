@@ -13,12 +13,22 @@
         <h4 class="fw-bold mb-0" th:text="${course.title}"></h4>
         <span th:if="${course.published}" class="badge bg-success ms-1">Published</span>
         <span th:unless="${course.published}" class="badge bg-secondary ms-1">Draft</span>
-        <button type="submit" class="btn btn-primary btn-sm ms-auto" disabled>
+        <button type="submit" form="courseForm" class="btn btn-primary btn-sm ms-auto">
             <i class="bi bi-save me-1"></i>Save Changes
         </button>
     </div>
 
-    <form th:action="@{/admin/courses/{id}(id=${course.id})}" method="post">
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mb-4">
+        <li class="nav-item">
+            <a class="nav-link active" href="#">General Info</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" th:href="@{/admin/courses/{id}/content(id=${course.id})}">Course Content</a>
+        </li>
+    </ul>
+
+    <form id="courseForm" th:action="@{/admin/courses/{id}(id=${course.id})}" method="post">
 
         <div class="row g-3">
 
