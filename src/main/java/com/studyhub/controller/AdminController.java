@@ -3,7 +3,9 @@ package com.studyhub.controller;
 import com.studyhub.dto.ChapterDTO;
 import com.studyhub.dto.LessonDTO;
 import com.studyhub.dto.CourseUpdateDTO;
+import com.studyhub.dto.CourseDetailDTO;
 import com.studyhub.dto.CreateUserDTO;
+import com.studyhub.model.User;
 import com.studyhub.enums.CourseLevel;
 import com.studyhub.enums.UserRole;
 import com.studyhub.enums.UserStatus;
@@ -148,6 +150,7 @@ public class AdminController {
 
     @GetMapping("/courses")
     public String courseList(
+            @AuthenticationPrincipal StudyHubUserDetails principal,
             @RequestParam(defaultValue = "") String search,
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) Long managerId,
@@ -158,6 +161,11 @@ public class AdminController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             Model model) {
+
+        User currentUser = principal.getUser();
+        if (currentUser.getRole() == UserRole.MANAGER) {
+            managerId = currentUser.getId();
+        }
 
         Sort sort = direction.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         var pageable = PageRequest.of(page, size, sort);
@@ -177,8 +185,11 @@ public class AdminController {
     }
 
     @GetMapping("/courses/{id}")
-    public String courseDetail(@PathVariable Long id, Model model) {
-        model.addAttribute("course", courseManagementService.findById(id));
+    public String courseDetail(@AuthenticationPrincipal StudyHubUserDetails principal, @PathVariable Long id, Model model) {
+        CourseDetailDTO course = courseManagementService.findById(id);
+        verifyCourseAccess(course, principal.getUser());
+
+        model.addAttribute("course", course);
         model.addAttribute("categories", courseManagementService.getCategories());
         model.addAttribute("managers", courseManagementService.getManagers());
         model.addAttribute("levels", CourseLevel.values());
@@ -186,10 +197,14 @@ public class AdminController {
     }
 
     @PostMapping("/courses/{id}")
-    public String updateCourse(@PathVariable Long id,
+    public String updateCourse(@AuthenticationPrincipal StudyHubUserDetails principal,
+                               @PathVariable Long id,
                                @ModelAttribute CourseUpdateDTO courseUpdateDTO,
                                RedirectAttributes redirectAttributes) {
         try {
+            CourseDetailDTO course = courseManagementService.findById(id);
+            verifyCourseAccess(course, principal.getUser());
+
             courseManagementService.updateCourse(id, courseUpdateDTO);
             redirectAttributes.addFlashAttribute("successMessage", "Course updated successfully.");
         } catch (Exception e) {
@@ -199,8 +214,11 @@ public class AdminController {
     }
 
     @GetMapping("/courses/{id}/content")
-    public String courseContent(@PathVariable Long id, Model model) {
-        model.addAttribute("course", courseManagementService.findById(id));
+    public String courseContent(@AuthenticationPrincipal StudyHubUserDetails principal, @PathVariable Long id, Model model) {
+        CourseDetailDTO course = courseManagementService.findById(id);
+        verifyCourseAccess(course, principal.getUser());
+
+        model.addAttribute("course", course);
         model.addAttribute("chapters", courseContentService.getChaptersByCourseId(id));
         model.addAttribute("newChapter", new ChapterDTO());
         model.addAttribute("newLesson", new LessonDTO());
@@ -208,8 +226,9 @@ public class AdminController {
     }
 
     @PostMapping("/courses/{id}/chapters")
-    public String addChapter(@PathVariable Long id, @ModelAttribute ChapterDTO chapterDTO, RedirectAttributes redirectAttributes) {
+    public String addChapter(@AuthenticationPrincipal StudyHubUserDetails principal, @PathVariable Long id, @ModelAttribute ChapterDTO chapterDTO, RedirectAttributes redirectAttributes) {
         try {
+            verifyCourseAccess(courseManagementService.findById(id), principal.getUser());
             courseContentService.addChapter(id, chapterDTO);
             redirectAttributes.addFlashAttribute("successMessage", "Chapter added.");
         } catch (Exception e) {
@@ -219,8 +238,9 @@ public class AdminController {
     }
 
     @PostMapping("/courses/{id}/chapters/{chapterId}")
-    public String updateChapter(@PathVariable Long id, @PathVariable Long chapterId, @ModelAttribute ChapterDTO chapterDTO, RedirectAttributes redirectAttributes) {
+    public String updateChapter(@AuthenticationPrincipal StudyHubUserDetails principal, @PathVariable Long id, @PathVariable Long chapterId, @ModelAttribute ChapterDTO chapterDTO, RedirectAttributes redirectAttributes) {
         try {
+            verifyCourseAccess(courseManagementService.findById(id), principal.getUser());
             courseContentService.updateChapter(chapterId, chapterDTO);
             redirectAttributes.addFlashAttribute("successMessage", "Chapter updated.");
         } catch (Exception e) {
@@ -230,8 +250,9 @@ public class AdminController {
     }
 
     @PostMapping("/courses/{id}/chapters/{chapterId}/delete")
-    public String deleteChapter(@PathVariable Long id, @PathVariable Long chapterId, RedirectAttributes redirectAttributes) {
+    public String deleteChapter(@AuthenticationPrincipal StudyHubUserDetails principal, @PathVariable Long id, @PathVariable Long chapterId, RedirectAttributes redirectAttributes) {
         try {
+            verifyCourseAccess(courseManagementService.findById(id), principal.getUser());
             courseContentService.deleteChapter(chapterId);
             redirectAttributes.addFlashAttribute("successMessage", "Chapter deleted.");
         } catch (Exception e) {
@@ -241,8 +262,9 @@ public class AdminController {
     }
 
     @PostMapping("/courses/{id}/chapters/{chapterId}/lessons")
-    public String addLesson(@PathVariable Long id, @PathVariable Long chapterId, @ModelAttribute LessonDTO lessonDTO, RedirectAttributes redirectAttributes) {
+    public String addLesson(@AuthenticationPrincipal StudyHubUserDetails principal, @PathVariable Long id, @PathVariable Long chapterId, @ModelAttribute LessonDTO lessonDTO, RedirectAttributes redirectAttributes) {
         try {
+            verifyCourseAccess(courseManagementService.findById(id), principal.getUser());
             courseContentService.addLesson(chapterId, lessonDTO);
             redirectAttributes.addFlashAttribute("successMessage", "Lesson added.");
         } catch (Exception e) {
@@ -252,8 +274,9 @@ public class AdminController {
     }
 
     @PostMapping("/courses/{id}/lessons/{lessonId}")
-    public String updateLesson(@PathVariable Long id, @PathVariable Long lessonId, @ModelAttribute LessonDTO lessonDTO, RedirectAttributes redirectAttributes) {
+    public String updateLesson(@AuthenticationPrincipal StudyHubUserDetails principal, @PathVariable Long id, @PathVariable Long lessonId, @ModelAttribute LessonDTO lessonDTO, RedirectAttributes redirectAttributes) {
         try {
+            verifyCourseAccess(courseManagementService.findById(id), principal.getUser());
             courseContentService.updateLesson(lessonId, lessonDTO);
             redirectAttributes.addFlashAttribute("successMessage", "Lesson updated.");
         } catch (Exception e) {
@@ -263,14 +286,21 @@ public class AdminController {
     }
 
     @PostMapping("/courses/{id}/lessons/{lessonId}/delete")
-    public String deleteLesson(@PathVariable Long id, @PathVariable Long lessonId, RedirectAttributes redirectAttributes) {
+    public String deleteLesson(@AuthenticationPrincipal StudyHubUserDetails principal, @PathVariable Long id, @PathVariable Long lessonId, RedirectAttributes redirectAttributes) {
         try {
+            verifyCourseAccess(courseManagementService.findById(id), principal.getUser());
             courseContentService.deleteLesson(lessonId);
             redirectAttributes.addFlashAttribute("successMessage", "Lesson deleted.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/admin/courses/" + id + "/content";
+    }
+
+    private void verifyCourseAccess(CourseDetailDTO course, User user) {
+        if (user.getRole() == UserRole.MANAGER && !user.getId().equals(course.getManagerId())) {
+            throw new org.springframework.security.access.AccessDeniedException("You are not authorized to manage this course.");
+        }
     }
 
     private String buildQueryString(String search, UserRole role, UserStatus status, String sortBy, String direction, int size) {
