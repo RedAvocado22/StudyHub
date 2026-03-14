@@ -37,7 +37,7 @@ public class AdminEnrollmentController {
                        Model model) {
         Sort sort = direction.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Page<EnrollmentDTO> enrollmentPage =
-                enrollmentService.findByFilters(courseId, status, keyword, page, 10, sort);
+                enrollmentService.findByFilters(null, courseId, status, keyword, page, 10, sort);
 
         model.addAttribute("enrollments", enrollmentPage.getContent());
         model.addAttribute("page", enrollmentPage);

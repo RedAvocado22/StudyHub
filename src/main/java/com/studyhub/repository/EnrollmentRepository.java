@@ -26,7 +26,8 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
         SELECT e FROM Enrollment e
         JOIN FETCH e.course c
         LEFT JOIN FETCH e.user u
-        WHERE (:courseId IS NULL OR c.id = :courseId)
+        WHERE (:userId IS NULL OR u.id = :userId)
+          AND (:courseId IS NULL OR c.id = :courseId)
           AND (:status   IS NULL OR e.status = :status)
           AND (
                :keyword IS NULL
@@ -38,7 +39,9 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
             countQuery = """
         SELECT COUNT(e) FROM Enrollment e
         JOIN e.course c
-        WHERE (:courseId IS NULL OR c.id = :courseId)
+        LEFT JOIN e.user u
+        WHERE (:userId IS NULL OR u.id = :userId)
+          AND (:courseId IS NULL OR c.id = :courseId)
           AND (:status   IS NULL OR e.status = :status)
           AND (
                :keyword IS NULL
@@ -49,6 +52,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     """
     )
     Page<Enrollment> findByFilters(
+            @Param("userId") Long userId,
             @Param("courseId") Long courseId,
             @Param("status") EnrollmentStatus status,
             @Param("keyword")  String keyword,
