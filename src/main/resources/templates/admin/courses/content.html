@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin}">
+<head><title>Course Content - [[${course.title}]]</title></head>
+<body>
+<div layout:fragment="content">
+
+    <div class="d-flex align-items-center gap-2 mb-4">
+        <a th:href="@{/admin/courses}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Back
+        </a>
+        <h4 class="fw-bold mb-0" th:text="${course.title}"></h4>
+        <span class="badge bg-info ms-1">Content Management</span>
+    </div>
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mb-4">
+        <li class="nav-item">
+            <a class="nav-link" th:href="@{/admin/courses/{id}(id=${course.id})}">General Info</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link active" href="#">Course Content</a>
+        </li>
+    </ul>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0">Chapters</h5>
+                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addChapterModal">
+                    <i class="bi bi-plus-lg me-1"></i>Add Chapter
+                </button>
+            </div>
+
+            <div th:if="${chapters.empty}" class="card border-0 shadow-sm mb-4">
+                <div class="card-body text-center py-5 text-muted">
+                    <i class="bi bi-folder2-open fs-1 mb-3 d-block"></i>
+                    <p>No chapters found for this course. Start by adding one!</p>
+                </div>
+            </div>
+
+            <div th:each="chapter : ${chapters}" class="card border-0 shadow-sm mb-4 overflow-hidden chapter-card">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center py-3">
+                    <div>
+                        <span class="badge bg-secondary me-2" th:text="${'Chapter ' + chapter.order}"></span>
+                        <span class="fw-bold h6 mb-0" th:text="${chapter.title}"></span>
+                        <small class="text-muted ms-2 d-none d-md-inline" th:text="${chapter.description}"></small>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-outline-secondary border-0" 
+                                th:data-id="${chapter.id}"
+                                th:data-title="${chapter.title}"
+                                th:data-description="${chapter.description}"
+                                th:data-order="${chapter.order}"
+                                onclick="editChapter(this)"
+                                data-bs-toggle="modal" data-bs-target="#editChapterModal">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger border-0"
+                                th:data-id="${chapter.id}"
+                                onclick="deleteChapter(this)"
+                                data-bs-toggle="modal" data-bs-target="#deleteChapterModal">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 mb-0">
+                            <thead class="bg-white">
+                                <tr class="small text-muted border-top-0">
+                                    <th class="ps-4 fw-normal border-0" style="width: 60px;">#</th>
+                                    <th class="fw-normal border-0">Lesson Title</th>
+                                    <th class="fw-normal border-0" style="width: 120px;">Type</th>
+                                    <th class="fw-normal border-0" style="width: 100px;">Duration</th>
+                                    <th class="fw-normal border-0 text-center" style="width: 80px;">Preview</th>
+                                    <th class="pe-4 border-0" style="width: 100px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="lesson : ${chapter.lessons}">
+                                    <td class="ps-4 text-muted small" th:text="${lesson.order}"></td>
+                                    <td class="fw-semibold" th:text="${lesson.title}"></td>
+                                    <td>
+                                        <span class="badge rounded-pill bg-light text-dark border small fw-normal" th:text="${lesson.contentType}"></span>
+                                    </td>
+                                    <td class="text-muted small" th:text="${lesson.durationMinutes + 'm'}"></td>
+                                    <td class="text-center">
+                                        <i th:if="${lesson.preview}" class="bi bi-check-circle-fill text-success"></i>
+                                        <i th:unless="${lesson.preview}" class="bi bi-dash-circle text-muted opacity-50"></i>
+                                    </td>
+                                    <td class="pe-4 text-end">
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-link text-secondary p-1"
+                                                    th:data-chapter-id="${chapter.id}"
+                                                    th:data-lesson-id="${lesson.id}"
+                                                    th:data-title="${lesson.title}"
+                                                    th:data-type="${lesson.contentType}"
+                                                    th:data-url="${lesson.contentUrl}"
+                                                    th:data-text="${lesson.contentText}"
+                                                    th:data-duration="${lesson.durationMinutes}"
+                                                    th:data-order="${lesson.order}"
+                                                    th:data-preview="${lesson.preview}"
+                                                    onclick="editLesson(this)"
+                                                    data-bs-toggle="modal" data-bs-target="#lessonModal">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-link text-danger p-1"
+                                                    th:data-id="${lesson.id}"
+                                                    onclick="deleteLesson(this)"
+                                                    data-bs-toggle="modal" data-bs-target="#deleteLessonModal">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="bg-light bg-opacity-10">
+                                    <td colspan="6" class="ps-4 py-2">
+                                        <button class="btn btn-link btn-sm text-decoration-none p-0 fw-semibold"
+                                                th:onclick="'addLesson(' + ${chapter.id} + ')'"
+                                                data-bs-toggle="modal" data-bs-target="#lessonModal">
+                                            <i class="bi bi-plus-lg me-1"></i>Add Lesson
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+
+    <!-- Add Chapter Modal -->
+    <div class="modal fade" id="addChapterModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form th:action="@{/admin/courses/{id}/chapters(id=${course.id})}" method="post" class="modal-content border-0 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold">Add New Chapter</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body py-4">
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">Title</label>
+                        <input type="text" name="title" class="form-control" placeholder="e.g. Getting Started" required>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label small text-muted">Description (Optional)</label>
+                        <textarea name="description" class="form-control" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-sm px-4">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Chapter Modal -->
+    <div class="modal fade" id="editChapterModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form id="editChapterForm" method="post" class="modal-content border-0 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold">Edit Chapter</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body py-4">
+                    <input type="hidden" name="id" id="editChapterId">
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">Title</label>
+                        <input type="text" name="title" id="editChapterTitle" class="form-control" required>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-8">
+                            <label class="form-label small text-muted">Description</label>
+                            <input type="text" name="description" id="editChapterDesc" class="form-control">
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label small text-muted">Order</label>
+                            <input type="number" name="order" id="editChapterOrder" class="form-control" min="1" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-sm px-4">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Chapter Modal -->
+    <div class="modal fade" id="deleteChapterModal" tabindex="-1">
+        <div class="modal-dialog modal-sm">
+            <form id="deleteChapterForm" method="post" class="modal-content border-0 shadow">
+                <div class="modal-body p-4 text-center">
+                    <i class="bi bi-exclamation-triangle text-danger fs-1 mb-3 d-block"></i>
+                    <h5 class="fw-bold">Delete Chapter?</h5>
+                    <p class="text-muted small mb-4">This will permanently remove the chapter and all its lessons.</p>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lesson Modal (Add/Edit) -->
+    <div class="modal fade" id="lessonModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form id="lessonForm" method="post" class="modal-content border-0 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="lessonModalTitle">Add/Edit Lesson</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body py-4">
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">Lesson Title</label>
+                        <input type="text" name="title" id="lessonTitle" class="form-control" required>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small text-muted">Content Type</label>
+                            <select name="contentType" id="lessonType" class="form-select" onchange="toggleLessonContent()">
+                                <option value="VIDEO">Video</option>
+                                <option value="TEXT">Text/Article</option>
+                                <option value="PDF">Document (PDF)</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small text-muted">Duration (min)</label>
+                            <input type="number" name="durationMinutes" id="lessonDuration" class="form-control" min="1" required>
+                        </div>
+                    </div>
+                    <div id="urlContent" class="mb-3">
+                        <label class="form-label small text-muted">URL (Video/PDF Link)</label>
+                        <input type="text" name="contentUrl" id="lessonUrl" class="form-control">
+                    </div>
+                    <div id="textContent" class="mb-3 d-none">
+                        <label class="form-label small text-muted">Content (Rich Text/HTML)</label>
+                        <textarea name="contentText" id="lessonText" class="form-control" rows="4"></textarea>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="form-label small text-muted">Order</label>
+                            <input type="number" name="order" id="lessonOrder" class="form-control" min="1" required>
+                        </div>
+                        <div class="col-6 d-flex align-items-end pb-1">
+                            <div class="form-check form-switch mb-2">
+                                <input class="form-check-input" type="checkbox" name="preview" id="lessonPreview">
+                                <label class="form-check-label small" for="lessonPreview">Allow Preview</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-sm px-4">Save Lesson</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Lesson Modal -->
+    <div class="modal fade" id="deleteLessonModal" tabindex="-1">
+        <div class="modal-dialog modal-sm">
+            <form id="deleteLessonForm" method="post" class="modal-content border-0 shadow">
+                <div class="modal-body p-4 text-center">
+                    <i class="bi bi-trash text-danger fs-1 mb-3 d-block"></i>
+                    <h5 class="fw-bold">Delete Lesson?</h5>
+                    <p class="text-muted small mb-4">This action cannot be undone.</p>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const courseId = [[${course.id}]];
+        
+        function editChapter(btn) {
+            const id = btn.getAttribute('data-id');
+            const title = btn.getAttribute('data-title');
+            const desc = btn.getAttribute('data-description');
+            const order = btn.getAttribute('data-order');
+            
+            document.getElementById('editChapterForm').action = '/admin/courses/' + courseId + '/chapters/' + id;
+            document.getElementById('editChapterId').value = id;
+            document.getElementById('editChapterTitle').value = title;
+            document.getElementById('editChapterDesc').value = desc;
+            document.getElementById('editChapterOrder').value = order;
+        }
+        
+        function deleteChapter(btn) {
+            const id = btn.getAttribute('data-id');
+            document.getElementById('deleteChapterForm').action = '/admin/courses/' + courseId + '/chapters/' + id + '/delete';
+        }
+        
+        function addLesson(chapterId) {
+            document.getElementById('lessonModalTitle').innerText = 'Add New Lesson';
+            document.getElementById('lessonForm').action = '/admin/courses/' + courseId + '/chapters/' + chapterId + '/lessons';
+            document.getElementById('lessonForm').reset();
+            toggleLessonContent();
+        }
+        
+        function editLesson(btn) {
+            const chapterId = btn.getAttribute('data-chapter-id');
+            const id = btn.getAttribute('data-lesson-id');
+            const title = btn.getAttribute('data-title');
+            const type = btn.getAttribute('data-type');
+            const url = btn.getAttribute('data-url');
+            const text = btn.getAttribute('data-text');
+            const duration = btn.getAttribute('data-duration');
+            const order = btn.getAttribute('data-order');
+            const preview = btn.getAttribute('data-preview') === 'true';
+
+            document.getElementById('lessonModalTitle').innerText = 'Edit Lesson';
+            document.getElementById('lessonForm').action = '/admin/courses/' + courseId + '/lessons/' + id;
+            document.getElementById('lessonTitle').value = title;
+            document.getElementById('lessonType').value = type;
+            document.getElementById('lessonUrl').value = url;
+            document.getElementById('lessonText').value = text;
+            document.getElementById('lessonDuration').value = duration;
+            document.getElementById('lessonOrder').value = order;
+            document.getElementById('lessonPreview').checked = preview;
+            toggleLessonContent();
+        }
+        
+        function deleteLesson(btn) {
+            const id = btn.getAttribute('data-id');
+            document.getElementById('deleteLessonForm').action = '/admin/courses/' + courseId + '/lessons/' + id + '/delete';
+        }
+        
+        function toggleLessonContent() {
+            const type = document.getElementById('lessonType').value;
+            const urlDiv = document.getElementById('urlContent');
+            const textDiv = document.getElementById('textContent');
+            
+            if (type === 'TEXT') {
+                urlDiv.classList.add('d-none');
+                textDiv.classList.remove('d-none');
+            } else {
+                urlDiv.classList.remove('d-none');
+                textDiv.classList.add('d-none');
+            }
+        }
+        /*]]>*/
+    </script>
+</div>
+</body>
+</html>

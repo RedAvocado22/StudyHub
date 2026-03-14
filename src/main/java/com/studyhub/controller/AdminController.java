@@ -1,5 +1,8 @@
 package com.studyhub.controller;
 
+import com.studyhub.dto.ChapterDTO;
+import com.studyhub.dto.LessonDTO;
+import com.studyhub.dto.CourseUpdateDTO;
 import com.studyhub.dto.CreateUserDTO;
 import com.studyhub.enums.CourseLevel;
 import com.studyhub.enums.UserRole;
@@ -29,6 +32,7 @@ public class AdminController {
 
     private final UserManagementService userManagementService;
     private final CourseManagementService courseManagementService;
+    private final com.studyhub.service.CourseContentService courseContentService;
     private final FileUploadService fileUploadService;
 
     @ModelAttribute
@@ -179,6 +183,94 @@ public class AdminController {
         model.addAttribute("managers", courseManagementService.getManagers());
         model.addAttribute("levels", CourseLevel.values());
         return "admin/courses/detail";
+    }
+
+    @PostMapping("/courses/{id}")
+    public String updateCourse(@PathVariable Long id,
+                               @ModelAttribute CourseUpdateDTO courseUpdateDTO,
+                               RedirectAttributes redirectAttributes) {
+        try {
+            courseManagementService.updateCourse(id, courseUpdateDTO);
+            redirectAttributes.addFlashAttribute("successMessage", "Course updated successfully.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Failed to update course: " + e.getMessage());
+        }
+        return "redirect:/admin/courses/" + id;
+    }
+
+    @GetMapping("/courses/{id}/content")
+    public String courseContent(@PathVariable Long id, Model model) {
+        model.addAttribute("course", courseManagementService.findById(id));
+        model.addAttribute("chapters", courseContentService.getChaptersByCourseId(id));
+        model.addAttribute("newChapter", new ChapterDTO());
+        model.addAttribute("newLesson", new LessonDTO());
+        return "admin/courses/content";
+    }
+
+    @PostMapping("/courses/{id}/chapters")
+    public String addChapter(@PathVariable Long id, @ModelAttribute ChapterDTO chapterDTO, RedirectAttributes redirectAttributes) {
+        try {
+            courseContentService.addChapter(id, chapterDTO);
+            redirectAttributes.addFlashAttribute("successMessage", "Chapter added.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/admin/courses/" + id + "/content";
+    }
+
+    @PostMapping("/courses/{id}/chapters/{chapterId}")
+    public String updateChapter(@PathVariable Long id, @PathVariable Long chapterId, @ModelAttribute ChapterDTO chapterDTO, RedirectAttributes redirectAttributes) {
+        try {
+            courseContentService.updateChapter(chapterId, chapterDTO);
+            redirectAttributes.addFlashAttribute("successMessage", "Chapter updated.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/admin/courses/" + id + "/content";
+    }
+
+    @PostMapping("/courses/{id}/chapters/{chapterId}/delete")
+    public String deleteChapter(@PathVariable Long id, @PathVariable Long chapterId, RedirectAttributes redirectAttributes) {
+        try {
+            courseContentService.deleteChapter(chapterId);
+            redirectAttributes.addFlashAttribute("successMessage", "Chapter deleted.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/admin/courses/" + id + "/content";
+    }
+
+    @PostMapping("/courses/{id}/chapters/{chapterId}/lessons")
+    public String addLesson(@PathVariable Long id, @PathVariable Long chapterId, @ModelAttribute LessonDTO lessonDTO, RedirectAttributes redirectAttributes) {
+        try {
+            courseContentService.addLesson(chapterId, lessonDTO);
+            redirectAttributes.addFlashAttribute("successMessage", "Lesson added.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/admin/courses/" + id + "/content";
+    }
+
+    @PostMapping("/courses/{id}/lessons/{lessonId}")
+    public String updateLesson(@PathVariable Long id, @PathVariable Long lessonId, @ModelAttribute LessonDTO lessonDTO, RedirectAttributes redirectAttributes) {
+        try {
+            courseContentService.updateLesson(lessonId, lessonDTO);
+            redirectAttributes.addFlashAttribute("successMessage", "Lesson updated.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/admin/courses/" + id + "/content";
+    }
+
+    @PostMapping("/courses/{id}/lessons/{lessonId}/delete")
+    public String deleteLesson(@PathVariable Long id, @PathVariable Long lessonId, RedirectAttributes redirectAttributes) {
+        try {
+            courseContentService.deleteLesson(lessonId);
+            redirectAttributes.addFlashAttribute("successMessage", "Lesson deleted.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/admin/courses/" + id + "/content";
     }
 
     private String buildQueryString(String search, UserRole role, UserStatus status, String sortBy, String direction, int size) {
