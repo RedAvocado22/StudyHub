@@ -163,7 +163,7 @@
     <!-- Edit Chapter Modal -->
     <div class="modal fade" id="editChapterModal" tabindex="-1">
         <div class="modal-dialog">
-            <form id="editChapterForm" method="post" class="modal-content border-0 shadow">
+            <form id="editChapterForm" th:action="@{/admin/courses}" method="post" class="modal-content border-0 shadow">
                 <div class="modal-header border-0 pb-0">
                     <h5 class="modal-title fw-bold">Edit Chapter</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -196,7 +196,7 @@
     <!-- Delete Chapter Modal -->
     <div class="modal fade" id="deleteChapterModal" tabindex="-1">
         <div class="modal-dialog modal-sm">
-            <form id="deleteChapterForm" method="post" class="modal-content border-0 shadow">
+            <form id="deleteChapterForm" th:action="@{/admin/courses}" method="post" class="modal-content border-0 shadow">
                 <div class="modal-body p-4 text-center">
                     <i class="bi bi-exclamation-triangle text-danger fs-1 mb-3 d-block"></i>
                     <h5 class="fw-bold">Delete Chapter?</h5>
@@ -213,7 +213,7 @@
     <!-- Lesson Modal (Add/Edit) -->
     <div class="modal fade" id="lessonModal" tabindex="-1">
         <div class="modal-dialog">
-            <form id="lessonForm" method="post" class="modal-content border-0 shadow">
+            <form id="lessonForm" th:action="@{/admin/courses}" method="post" class="modal-content border-0 shadow">
                 <div class="modal-header border-0 pb-0">
                     <h5 class="modal-title fw-bold" id="lessonModalTitle">Add/Edit Lesson</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -269,7 +269,7 @@
     <!-- Delete Lesson Modal -->
     <div class="modal fade" id="deleteLessonModal" tabindex="-1">
         <div class="modal-dialog modal-sm">
-            <form id="deleteLessonForm" method="post" class="modal-content border-0 shadow">
+            <form id="deleteLessonForm" th:action="@{/admin/courses}" method="post" class="modal-content border-0 shadow">
                 <div class="modal-body p-4 text-center">
                     <i class="bi bi-trash text-danger fs-1 mb-3 d-block"></i>
                     <h5 class="fw-bold">Delete Lesson?</h5>
