@@ -6,8 +6,8 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "courses")
@@ -47,9 +47,10 @@ public class Course {
     @Column(nullable = false)
     private boolean published;
 
+    @Builder.Default
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("order ASC")
-    private List<Chapter> chapters = new ArrayList<>();
+    private Set<Chapter> chapters = new LinkedHashSet<>();
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
