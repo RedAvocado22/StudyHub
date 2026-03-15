@@ -25,13 +25,13 @@
                     <div class="container mt-3">
                         <div>
                             <img th:src="${user.profileImage}"
-                                 class="img-thumbnail mx-auto d-block" alt="Avatar">
+                                 class="img-thumbnail mx-auto d-block" alt="Avatar" id="avatarPreview">
                             <div class="h5 text-center" th:text="${user.email}"></div>
                         </div>
                         <div class="mx-auto text-center">
                             <div>
                                 <label for="fileUpload" class="btn btn-sm btn-outline-primary">Choose other image</label>
-                                <input type="file" id="fileUpload" name="imageFile" accept="image/*" hidden>
+                                <input type="file" id="fileUpload" name="imageFile" accept="image/*" onchange="previewImage(this)" hidden>
                                 <div class="lead">Accept PNG,JPG,GIF,Max 5 Mb</div>
                             </div>
                         </div>
@@ -69,6 +69,29 @@
             </div>
         </form>
     </div>
+
+    <script>
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+
+                // 1. Kiểm tra kích thước file (Option: 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert("File is too big! Maximum 5MB allowed.");
+                    input.value = ""; // Reset input
+                    return;
+                }
+
+                // 2. Đọc file và hiển thị preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('avatarPreview');
+                    preview.src = e.target.result; // Thay đổi src của ảnh thành dữ liệu Base64
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
 </div>
 </body>
 </html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin}">
+<head><title>Update Post</title></head>
+<body>
+<div layout:fragment="content">
+    <div class="container">
+        <div class="h2 mt-5 mb-3">Post Details</div>
+        <form th:action="@{/admin/post/update}" th:object="${newPostDTO}" method="post" enctype="multipart/form-data">
+            <div class="row">
+                <div class="col-7">
+                    <input type="hidden" name="id" th:value="${id}">
+                    <div class="row">
+                        <div class="col">
+                            <label for="l1" class="form-label">Title*</label>
+                            <input type="text" th:field="*{title}" class="form-control" id="l1">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <label for="exampleFormControlInput1" class="form-label">Category</label>
+                            <select th:field="*{category}" class="form-select" aria-label="Default select example"
+                                    id="exampleFormControlInput1">
+                                <option th:each="c : ${categories}"
+                                        th:value="${c.id}"
+                                        th:text="${c.name}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col">
+                            <label for="l2" class="form-label">Author</label>
+                            <input type="text" th:value="${user.fullName}" class="form-control" id="l2" disabled>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="form-label">Status</label>
+                        <div>
+                            <div class="form-check d-inline-block">
+                                <input th:field="*{status}" value="Draft" class="form-check-input" type="radio" id="radioDefault1">
+                                <label class="form-check-label" for="radioDefault1">
+                                    Draft
+                                </label>
+                            </div>
+                            <div class="form-check d-inline-block ms-5">
+                                <input th:field="*{status}" value="Published" class="form-check-input" type="radio" id="radioDefault2">
+                                <label class="form-check-label" for="radioDefault2">
+                                    Published
+                                </label>
+                            </div>
+                            <div class="form-check d-inline-block ms-5">
+                                <input th:field="*{status}" value="Hidden" class="form-check-input" type="radio" id="radioDefault3">
+                                <label class="form-check-label" for="radioDefault3">
+                                    Hidden
+                                </label>
+                            </div>
+                            <div class="form-check d-inline-block ms-5">
+                                <input th:field="*{featured}" class="form-check-input" type="checkbox" value="true" id="checkDefault">
+                                <label class="form-check-label" for="checkDefault">
+                                    Featured Post
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-5 text-center">
+                    <label for="l1" class="form-label">Thumbnail</label>
+                    <label for="fileUpload" class="btn btn-sm btn-outline-primary">Change</label>
+                    <input type="file" id="fileUpload" name="imageFile" accept="image/*" onchange="previewImage(this)" hidden>
+                    <div class="text-center">
+                        <img th:src="${newPostDTO.thumbnail}" class="rounded" alt="thumbnail"
+                             id="avatarPreview">
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col">
+                    <textarea th:field="*{content}" id="editor1"></textarea>
+                    <button type="submit" class="btn btn-primary mb-3 mt-3">Submit</button>
+                    <a th:href="@{/admin/post/list}" class="btn btn-danger mb-3 mt-3">Cancel</a>
+                </div>
+            </div>
+        </form>
+    </div>
+    <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js">
+    </script>
+    <script>
+        var editor = CKEDITOR.replace('editor1');
+        //update when user type text
+        editor.on('change', function() {
+            editor.updateElement();
+        });
+    </script>
+    <script>
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+
+                // 1. Kiểm tra kích thước file (Option: 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert("File is too big! Maximum 5MB allowed.");
+                    input.value = ""; // Reset input
+                    return;
+                }
+
+                // 2. Đọc file và hiển thị preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('avatarPreview');
+                    preview.src = e.target.result; // Thay đổi src của ảnh thành dữ liệu Base64
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
+</div>
+</body>
+</html>

@@ -2,6 +2,7 @@ package com.studyhub.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Nationalized;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,7 +14,8 @@ public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false, columnDefinition = "NVARCHAR(100)")
+    @Nationalized
+    @Column(nullable = false, length = 100)
     private String title;
     private String content;
     private String status;
@@ -31,6 +33,8 @@ public class Post {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Setting category;
+    private String thumbnail;
+    private boolean featuredPost;
 
     @PrePersist
     protected void onCreate() {
