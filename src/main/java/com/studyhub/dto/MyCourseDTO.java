@@ -18,4 +18,5 @@ public class MyCourseDTO {
     private BigDecimal price;
     private BigDecimal progress;
     private LocalDateTime enrolledAt;
+    private boolean published;
 }

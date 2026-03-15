@@ -23,6 +23,10 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 
     Optional<Enrollment> findById(Long id);
 
+    boolean existsByUserAndCourse_IdAndStatus(User user, Long courseId, EnrollmentStatus status);
+
+    Optional<Enrollment> findByUserAndCourse_IdAndStatus(User user, Long courseId, EnrollmentStatus status);
+
     @Query(
             value = """
         SELECT e FROM Enrollment e

@@ -7,7 +7,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/my-courses")
@@ -20,5 +22,14 @@ public class MyCoursesController {
     public String list(@AuthenticationPrincipal UserDetails userDetails, Model model) {
         model.addAttribute("courses", lessonAccessService.getApprovedCoursesByUsername(userDetails.getUsername()));
         return "user/my-courses";
+    }
+
+    @GetMapping("/{courseId}/lessons")
+    public String viewLessons(@PathVariable Long courseId,
+                              @RequestParam(required = false) Long lessonId,
+                              @AuthenticationPrincipal UserDetails userDetails,
+                              Model model) {
+        model.addAttribute("viewer", lessonAccessService.getLessonViewer(userDetails.getUsername(), courseId, lessonId));
+        return "user/lesson-viewer";
     }
 }

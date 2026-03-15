@@ -51,7 +51,7 @@
                                     </div>
                                 </div>
                                 <div class="mt-auto d-flex gap-2">
-                                    <a class="btn btn-primary btn-sm" th:href="@{/courses/{id}(id=${course.courseId})}">
+                                    <a class="btn btn-primary btn-sm" th:href="@{/my-courses/{id}/lessons(id=${course.courseId})}">
                                         <i class="bi bi-play-circle me-1"></i>Start Learning
                                     </a>
                                     <span class="badge bg-light text-dark border" th:text="${course.price}"></span>
