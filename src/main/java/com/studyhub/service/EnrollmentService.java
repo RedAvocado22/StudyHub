@@ -27,10 +27,10 @@ public class EnrollmentService {
     private final CourseRepository courseRepository;
     private final UserRepository userRepository;
 
-    public Page<EnrollmentDTO> findByFilters(Long courseId, EnrollmentStatus status,
+    public Page<EnrollmentDTO> findByFilters(Long userId, Long courseId, EnrollmentStatus status,
                                              String keyword, int page, int size, Sort sort) {
         return enrollmentRepository
-                .findByFilters(courseId, status, keyword, PageRequest.of(page, size, sort))
+                .findByFilters(userId, courseId, status, keyword, PageRequest.of(page, size, sort))
                 .map(this::toDto);
     }
 

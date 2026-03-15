@@ -43,7 +43,7 @@
                         </a>
                     </li>
                     <li sec:authorize="hasAnyAuthority('ADMIN','MANAGER','MEMBER')">
-                        <a class="dropdown-item" th:href="@{/my-enrollments}">
+                        <a class="dropdown-item" th:href="@{/enrollments/me}">
                             <i class="bi bi-person-check me-2"></i>My Enrollments
                         </a>
                     </li>
