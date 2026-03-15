@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
@@ -32,4 +33,13 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> filterPosts(@Param("title") String title,
                            @Param("category") String category,
                            @Param("author") String author);
+    List<Post> findByStatusAndTitleContainingIgnoreCase(String status, String keyword);
+    List<Post> findByStatus(String status);
+    List<Post> findByCategoryIdAndStatus(Long categoryId, String status);
+    @Query("""
+           SELECT p FROM Post p 
+           LEFT JOIN FETCH p.category 
+           WHERE p.id = :id
+           """)
+    Optional<Post> findPostWithCategory(@Param("id") Long id);
 }

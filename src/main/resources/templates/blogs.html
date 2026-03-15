@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Blogs</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container">
+        <div class="row" style="min-height: 100vh;">
+            <div class="col-8 border-end border-3 border-secondary-subtle">
+                <div class="text-bg-primary p-3 h5">Blog List</div>
+                <a th:each="b : ${blogs}" th:href="@{/blogs/detail(id=${b.id})}"
+                    class="text-decoration-none">
+                    <div class="card mb-3">
+                        <div class="row g-0">
+                            <div class="col-md-4">
+                                <img th:src="${b.thumbnail}" class="img-fluid rounded-start" alt="..."
+                                     style="height: 100%; object-fit: cover;">
+                            </div>
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <h5 th:text="${b.title}" class="card-title"></h5>
+                                    <p th:utext="${b.content}" class="card-text">Nội dung bài viết.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-4">
+                <div class="text-bg-primary p-3 h5">Search Blogs</div>
+                <form th:action="@{/blogs/blogs-search}" method="post">
+                    <input type="text" name="title" class="form-control" placeholder="Type keyword to search">
+                </form>
+                <div class="text-bg-primary p-1 h5 my-3">Blog Categories</div>
+                <div class="ms-3">
+                    <ul class="list-group list-group-flush">
+                        <li th:each="c : ${categories}" class="list-group-item">
+                            <p><a th:href="@{/blogs/blogs-category/{id}(id=${c.id})}"
+                                  th:value="${c.id}"
+                                  th:text="${c.name}"
+                                  class="link-primary">Primary link</a>
+                            </p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
