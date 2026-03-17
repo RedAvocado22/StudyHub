@@ -85,11 +85,33 @@
                                 <i class="bi bi-clock me-1"></i>
                                 <span th:text="${course.durationHours} + ' hours'"></span>
                             </div>
-                            <div class="d-flex justify-content-between align-items-center mt-auto pt-2 border-top">
-                                <span class="fw-bold text-primary"
-                                      th:text="${#numbers.formatDecimal(course.price, 1, 'COMMA', 0, 'NONE') + ' ₫'}"></span>
-                                <a th:href="@{/courses/{id}(id=${course.id})}"
-                                   class="btn btn-primary btn-sm px-3">View Course</a>
+                            <div class="mt-auto pt-2 border-top">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="fw-bold text-primary fs-5"
+              th:text="${#numbers.formatDecimal(course.price, 1, 'COMMA', 0, 'NONE') + ' ₫'}"></span>
+                                    <a th:href="@{/courses/{id}(id=${course.id})}"
+                                       class="btn btn-outline-secondary btn-sm">
+                                        <i class="bi bi-info-circle me-1"></i>Details
+                                    </a>
+                                </div>
+                                <div sec:authorize="isAnonymous()">
+                                    <a th:href="@{/courses/{id}/enroll(id=${course.id})}"
+                                       class="btn btn-primary btn-sm w-100">
+                                        <i class="bi bi-plus-circle me-1"></i>Enroll Now
+                                    </a>
+                                </div>
+                                <div sec:authorize="isAuthenticated()">
+                                    <a th:if="${!enrolledCourseIds.contains(course.id)}"
+                                       th:href="@{/courses/{id}/enroll(id=${course.id})}"
+                                       class="btn btn-primary btn-sm w-100">
+                                        <i class="bi bi-plus-circle me-1"></i>Enroll Now
+                                    </a>
+                                    <a th:if="${enrolledCourseIds.contains(course.id)}"
+                                       th:href="@{/courses/{id}(id=${course.id})}"
+                                       class="btn btn-success btn-sm w-100 disabled">
+                                        <i class="bi bi-check-circle me-1"></i>Enrolled
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 
@@ -58,4 +59,6 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
             @Param("keyword")  String keyword,
             Pageable pageable
     );
+    @Query("SELECT e.course.id FROM Enrollment e WHERE e.user.id = :userId")
+    Set<Long> findCourseIdsByUserId(@Param("userId") Long userId);
 }

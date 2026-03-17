@@ -36,6 +36,8 @@ public class SecurityConfig {
                     "/register", "/verify", "/resend-verification",
                     "/forgot-password", "/reset-password",
                     "/courses/{id}/enroll",
+                        "/payment/payos/return", "/payment/payos/cancel",
+                        "/payment/vnpay/return","/payment/payos/webhook",
                     "/css/**", "/js/**", "/images/**", "/webjars/**"
                 ).permitAll()
                 .requestMatchers("/admin/settings/**", "/admin/users/**")
@@ -47,7 +49,8 @@ public class SecurityConfig {
                 .requestMatchers("/admin/**")
                     .hasAnyAuthority("ADMIN", "MANAGER")
                 .requestMatchers(
-                    "/profile/**", "/my-enrollments/**",
+                    "/profile/**", "/my-enrollments", "/my-enrollments/**",
+                        "/enrollments/me", "/enrollments/me/**",
                     "/my-courses/**", "/learn/**", "/change-password"
                 ).hasAnyAuthority("ADMIN", "MANAGER", "MEMBER")
                 .anyRequest().authenticated()

@@ -11,6 +11,7 @@ import com.studyhub.model.Course;
 import com.studyhub.model.Setting;
 import com.studyhub.model.User;
 import com.studyhub.repository.CourseRepository;
+import com.studyhub.repository.EnrollmentRepository;
 import com.studyhub.repository.SettingRepository;
 import com.studyhub.repository.UserRepository;
 import jakarta.persistence.criteria.Join;
@@ -24,9 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 import static org.springframework.util.StringUtils.hasText;
 
@@ -34,8 +33,8 @@ import static org.springframework.util.StringUtils.hasText;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class CourseManagementService {
-
-    private final CourseRepository courseRepository;
+    private  final EnrollmentRepository enrollmentRepository;
+    private  final CourseRepository courseRepository;
     private final UserRepository userRepository;
     private final SettingRepository settingRepository;
 
@@ -156,5 +155,15 @@ public class CourseManagementService {
                 course.getDurationHours(),
                 course.getCategory() != null ? course.getCategory().getName() : null
         );
+    }
+    // Thêm import java.util.Set; và java.util.HashSet;
+
+    public Set<Long> getEnrolledCourseIds(String email) {
+        if (email == null) return new HashSet<>();
+
+        // Tìm user theo email, sau đó lấy ID để truy vấn danh sách khóa học đã đăng ký
+        return userRepository.findByEmail(email)
+                .map(user -> enrollmentRepository.findCourseIdsByUserId(user.getId()))
+                .orElse(new HashSet<>());
     }
 }

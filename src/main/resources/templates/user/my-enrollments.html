@@ -103,35 +103,41 @@
                                 <td>
                                     <div class="d-flex gap-1 justify-content-end pe-3">
                                         <th:block th:switch="${e.status.name()}">
+
                                             <a th:case="'APPROVED'"
                                                th:href="@{/courses/{id}(id=${e.courseId})}"
                                                class="btn btn-sm btn-outline-success"
                                                style="width: 90px;">
                                                 <i class="bi bi-play-circle me-1"></i>Access
                                             </a>
-                                            <button th:case="'PENDING'"
-                                                    type="button"
-                                                    class="btn btn-sm btn-outline-danger"
-                                                    style="width: 90px;"
-                                                    data-bs-toggle="modal"
-                                                    th:attr="data-bs-target='#cancelModal' + ${e.id}">
-                                                <i class="bi bi-x-circle me-1"></i>Cancel
-                                            </button>
+
+                                            <div th:case="'PENDING'" class="d-flex gap-1">
+                                                <a th:href="@{/courses/{courseId}/enroll(courseId=${e.courseId}, enrollmentId=${e.id})}"
+                                                   class="btn btn-sm btn-primary"
+                                                   style="width: 90px;">
+                                                    <i class="bi bi-credit-card me-1"></i>Pay Now
+                                                </a>
+                                                <button type="button"
+                                                        class="btn btn-sm btn-outline-danger"
+                                                        style="width: 40px;"
+                                                        data-bs-toggle="modal"
+                                                        th:attr="data-bs-target='#cancelModal' + ${e.id}">
+                                                    <i class="bi bi-x-circle"></i>
+                                                </button>
+                                            </div>
+
+                                            <div th:case="'REJECTED'" class="d-flex gap-1">
+                                                <a th:href="@{/courses/{courseId}/enroll(courseId=${e.courseId}, enrollmentId=${e.id})}"
+                                                   class="btn btn-sm btn-warning"
+                                                   style="width: 90px;">
+                                                    <i class="bi bi-pencil-square me-1"></i>Update
+                                                </a>
+                                            </div>
+
                                             <button th:case="*" class="btn btn-sm btn-outline-secondary" style="width: 90px;" disabled>
                                                 <i class="bi bi-eye me-1"></i>View
                                             </button>
                                         </th:block>
-                                    </div>
-
-                                    <!-- Modal -->
-                                    <div th:if="${e.status.name() == 'PENDING'}"
-                                         th:replace="~{fragments/confirm-modal :: confirm-modal(
-                                         modalId=${'cancelModal' + e.id},
-                                         title='Cancel Enrollment',
-                                         message='Are you sure you want to cancel this enrollment?',
-                                         formAction=@{/enrollments/me/{id}/cancel(id=${e.id})},
-                                         buttonLabel='Cancel Enrollment',
-                                         buttonClass='btn-danger')}">
                                     </div>
                                 </td>
                             </tr>
@@ -141,6 +147,30 @@
             </div>
             <div class="card-footer bg-transparent" th:if="${page.totalPages > 1}">
                  <div th:replace="~{fragments/pagination :: pagination(page=${page}, baseUrl='/enrollments/me', queryString=${queryString})}"></div>
+            </div>
+        </div>
+
+        <div th:each="e : ${enrollments}" th:if="${e.status.name() == 'PENDING'}">
+            <div class="modal fade" th:id="'cancelModal' + ${e.id}" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Cancel Enrollment</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Are you sure you want to cancel enrollment for
+                                <strong th:text="${e.courseTitle}"></strong>?
+                            </p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                            <form th:action="@{/enrollments/me/{id}/cancel(id=${e.id})}" method="post">
+                                <button type="submit" class="btn btn-danger">Yes, Cancel</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
