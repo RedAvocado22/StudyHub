@@ -165,7 +165,7 @@ public class DataSeeder implements ApplicationRunner {
 
         Chapter ch2 = chapter("Java Fundamentals", "Variables, control flow and methods", 2, course);
         lesson("Variables and Data Types", LessonContentType.VIDEO, JAVA_INTRO, null, 12, 1, ch2, false);
-        lesson("Control Flow Statements", LessonContentType.PDF, "https://cdn.studyhub.com/pdfs/java-control-flow.pdf", null, 10, 2, ch2, false);
+        lesson("Control Flow Statements", LessonContentType.PDF, "/uploads/files/StudyHub_Specs.pdf", null, 10, 2, ch2, false);
         lesson("Methods and Parameters", LessonContentType.VIDEO, JAVA_INTRO, null, 15, 3, ch2, false);
 
         Chapter ch3 = chapter("Object-Oriented Programming", "Classes, objects and inheritance", 3, course);
@@ -185,7 +185,7 @@ public class DataSeeder implements ApplicationRunner {
         lesson("Request Mapping and DTOs", LessonContentType.TEXT, null,
                 "<h3>DTOs</h3><p>Data Transfer Objects decouple your domain model from the API contract.</p>",
                 10, 2, ch2, false);
-        lesson("Global Exception Handling", LessonContentType.PDF, "https://cdn.studyhub.com/pdfs/spring-exceptions.pdf", null, 12, 3, ch2, false);
+        lesson("Global Exception Handling", LessonContentType.PDF, "/uploads/files/StudyHub_Screens.pdf", null, 12, 3, ch2, false);
 
         Chapter ch3 = chapter("Spring Security", "Authentication and authorization", 3, course);
         lesson("Authentication Basics", LessonContentType.VIDEO, SPRING_SEC, null, 20, 1, ch3, true);
@@ -198,7 +198,7 @@ public class DataSeeder implements ApplicationRunner {
         Chapter ch1 = chapter("Design Fundamentals", "Color theory, typography and layout", 1, course);
         lesson("Color Theory", LessonContentType.VIDEO, DESIGN_INTRO, null, 12, 1, ch1, true);
         lesson("Typography Basics", LessonContentType.VIDEO, DESIGN_INTRO, null, 10, 2, ch1, false);
-        lesson("Layout and Spacing", LessonContentType.PDF, "https://cdn.studyhub.com/pdfs/layout-guide.pdf", null, 8, 3, ch1, false);
+        lesson("Layout and Spacing", LessonContentType.PDF, "/uploads/files/StudyHub_Specs.pdf", null, 8, 3, ch1, false);
 
         Chapter ch2 = chapter("Wireframing and Prototyping", "Tools and techniques for wireframes", 2, course);
         lesson("Creating Wireframes", LessonContentType.VIDEO, FIGMA_INTRO, null, 15, 1, ch2, false);
@@ -216,7 +216,7 @@ public class DataSeeder implements ApplicationRunner {
         lesson("Supervised vs Unsupervised", LessonContentType.TEXT, null,
                 "<h3>ML Types</h3><p>Supervised learning uses labeled data while unsupervised finds patterns.</p>",
                 15, 1, ch2, false);
-        lesson("Linear Regression", LessonContentType.PDF, "https://cdn.studyhub.com/pdfs/linear-regression.pdf", null, 20, 2, ch2, false);
+        lesson("Linear Regression", LessonContentType.PDF, "/uploads/files/StudyHub_Screens.pdf", null, 20, 2, ch2, false);
         lesson("Decision Trees and Random Forests", LessonContentType.VIDEO, ML_TREES, null, 25, 3, ch2, false);
     }
 
@@ -229,7 +229,7 @@ public class DataSeeder implements ApplicationRunner {
 
         Chapter ch2 = chapter("Social Media Marketing", "Paid and organic social strategies", 2, course);
         lesson("Facebook and Instagram Ads", LessonContentType.VIDEO, SOCIAL_ADS, null, 15, 1, ch2, false);
-        lesson("Content Calendar Planning", LessonContentType.PDF, "https://cdn.studyhub.com/pdfs/content-calendar.pdf", null, 10, 2, ch2, false);
+        lesson("Content Calendar Planning", LessonContentType.PDF, "/uploads/files/StudyHub_Specs.pdf", null, 10, 2, ch2, false);
     }
 
     private Chapter chapter(String title, String description, int order, Course course) {
