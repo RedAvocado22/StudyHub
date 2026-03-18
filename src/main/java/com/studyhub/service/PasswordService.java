@@ -26,12 +26,12 @@ public class PasswordService {
 
     @Transactional
     public void sendResetEmail(String email) {
-        userRepository.findByEmail(email).ifPresent(user -> {
-            user.setResetPasswordToken(UUID.randomUUID().toString());
-            user.setResetPasswordTokenExpiry(LocalDateTime.now().plusMinutes(resetExpiryMinutes));
-            userRepository.save(user);
-            emailService.sendPasswordResetEmail(user);
-        });
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("No account found with that email address."));
+        user.setResetPasswordToken(UUID.randomUUID().toString());
+        user.setResetPasswordTokenExpiry(LocalDateTime.now().plusMinutes(resetExpiryMinutes));
+        userRepository.save(user);
+        emailService.sendPasswordResetEmail(user);
     }
 
     @Transactional

@@ -19,10 +19,16 @@
         </form>
     </div>
 
+    <div th:if="${errorMessage}" class="alert alert-danger d-flex align-items-center gap-2 py-2 mb-3">
+        <i class="bi bi-exclamation-circle-fill"></i>
+        <span th:text="${errorMessage}"></span>
+    </div>
+
     <form th:action="@{/login}" method="post">
         <div class="mb-3">
             <label for="username" class="form-label">Email or Username <span class="text-danger">*</span></label>
             <input type="text" id="username" name="username" class="form-control"
+                   th:value="${loginUsername}"
                    placeholder="Enter email or username" required autofocus>
         </div>
         <div class="mb-3">

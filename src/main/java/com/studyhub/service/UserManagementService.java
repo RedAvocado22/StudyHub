@@ -1,6 +1,7 @@
 package com.studyhub.service;
 
 import com.studyhub.dto.CreateUserDTO;
+import com.studyhub.dto.UpdateUserDTO;
 import com.studyhub.dto.UserDetailDTO;
 import com.studyhub.dto.UserListDTO;
 import com.studyhub.enums.UserRole;
@@ -103,6 +104,22 @@ public class UserManagementService {
         userRepository.save(user);
         emailService.sendNewAccountEmail(user, rawPassword);
         return user;
+    }
+
+    @Transactional
+    public void updateInfo(Long id, UpdateUserDTO dto) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("User not found"));
+        if (userRepository.existsByEmailAndIdNot(dto.getEmail(), id)) {
+            throw new IllegalArgumentException("This email is already in use by another account.");
+        }
+        if (userRepository.existsByUsernameAndIdNot(dto.getUsername(), id)) {
+            throw new IllegalArgumentException("This username is already taken.");
+        }
+        user.setFullName(dto.getFullName());
+        user.setEmail(dto.getEmail());
+        user.setUsername(dto.getUsername());
+        user.setMobile(dto.getMobile());
     }
 
     private String generateUsername(String email) {
