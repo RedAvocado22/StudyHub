@@ -25,6 +25,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.data.domain.Sort;
+
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -34,8 +36,9 @@ import static org.springframework.util.StringUtils.hasText;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class CourseManagementService {
-    private  final EnrollmentRepository enrollmentRepository;
-    private  final CourseRepository courseRepository;
+
+    private final CourseRepository courseRepository;
+    private final EnrollmentRepository enrollmentRepository;
     private final UserRepository userRepository;
     private final SettingRepository settingRepository;
 
@@ -54,16 +57,26 @@ public class CourseManagementService {
     }
 
     public List<CourseCardDTO> searchActiveCoursesSortedByName(String keyword) {
-        if (!hasText(keyword)) {
-            return getAllActiveCoursesSortedByName();
-        }
+        return searchActiveCoursesSortedByName(keyword, null);
+    }
 
-        String normalizedKeyword = keyword.trim();
-        return courseRepository
-                .findByPublishedTrueAndTitleContainingIgnoreCaseOrPublishedTrueAndDescriptionContainingIgnoreCaseOrderByTitleAsc(
-                        normalizedKeyword,
-                        normalizedKeyword
-                )
+    public List<CourseCardDTO> searchActiveCoursesSortedByName(String keyword, Long categoryId) {
+        Specification<Course> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.isTrue(root.get("published")));
+            if (hasText(keyword)) {
+                String pattern = "%" + keyword.trim().toLowerCase() + "%";
+                predicates.add(cb.or(
+                        cb.like(cb.lower(root.get("title")), pattern),
+                        cb.like(cb.lower(root.get("description")), pattern)
+                ));
+            }
+            if (categoryId != null) {
+                predicates.add(cb.equal(root.get("category").get("id"), categoryId));
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+        return courseRepository.findAll(spec, Sort.by("title").ascending())
                 .stream()
                 .map(this::toCourseCardDTO)
                 .toList();
@@ -71,6 +84,10 @@ public class CourseManagementService {
 
     public long countPublishedCourses() {
         return courseRepository.countByPublishedTrue();
+    }
+
+    public long countPublishedCoursesByManager(Long managerId) {
+        return courseRepository.countByPublishedTrueAndManager_Id(managerId);
     }
 
     public long countStudents() {
@@ -108,17 +125,20 @@ public class CourseManagementService {
     }
 
     @Transactional
-    public void updateCourse(Long id, CourseUpdateDTO dto) {
+    public void updateCourse(Long id, CourseUpdateDTO dto, UserRole callerRole) {
         Course course = courseRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Course not found"));
 
         course.setTitle(dto.getTitle());
         course.setDescription(dto.getDescription());
         course.setThumbnailUrl(dto.getThumbnailUrl());
-        course.setPrice(dto.getPrice());
         course.setLevel(dto.getLevel());
         course.setDurationHours(dto.getDurationHours());
-        course.setPublished(dto.isPublished());
+
+        if (callerRole != UserRole.MANAGER) {
+            course.setPrice(dto.getPrice());
+            course.setPublished(dto.isPublished());
+        }
 
         if (dto.getCategoryId() != null) {
             Setting category = settingRepository.findById(dto.getCategoryId())
@@ -128,13 +148,21 @@ public class CourseManagementService {
             course.setCategory(null);
         }
 
-        if (dto.getManagerId() != null) {
+        if (callerRole != UserRole.MANAGER && dto.getManagerId() != null) {
             User manager = userRepository.findById(dto.getManagerId())
                     .orElseThrow(() -> new NoSuchElementException("Manager not found"));
             course.setManager(manager);
         }
 
         courseRepository.save(course);
+    }
+
+    @Transactional
+    public void deleteCourse(Long id) {
+        if (enrollmentRepository.existsByCourse_Id(id)) {
+            throw new IllegalStateException("Cannot delete a course that has enrollment records.");
+        }
+        courseRepository.deleteById(id);
     }
 
     public List<SettingListItemDTO> getCategories() {
@@ -186,15 +214,5 @@ public class CourseManagementService {
                 course.getDurationHours(),
                 course.getCategory() != null ? course.getCategory().getName() : null
         );
-    }
-    // Thêm import java.util.Set; và java.util.HashSet;
-
-    public Set<Long> getEnrolledCourseIds(String email) {
-        if (email == null) return new HashSet<>();
-
-        // Tìm user theo email, sau đó lấy ID để truy vấn danh sách khóa học đã đăng ký
-        return userRepository.findByEmail(email)
-                .map(user -> enrollmentRepository.findCourseIdsByUserId(user.getId()))
-                .orElse(new HashSet<>());
     }
 }

@@ -24,6 +24,8 @@ public interface CourseRepository extends JpaRepository<Course, Long>, JpaSpecif
 
     long countByPublishedTrue();
 
+    long countByPublishedTrueAndManager_Id(Long managerId);
+
     @EntityGraph(attributePaths = {"category", "manager"})
     Optional<Course> findWithDetailsById(Long id);
 
