@@ -1,6 +1,7 @@
 package com.studyhub.controller;
 
 import com.studyhub.dto.ChangePasswordDTO;
+import com.studyhub.dto.ForgotPasswordDTO;
 import com.studyhub.dto.ResetPasswordDTO;
 import com.studyhub.security.StudyHubUserDetails;
 import com.studyhub.service.PasswordService;
@@ -24,17 +25,27 @@ public class PasswordController {
     private final PasswordService passwordService;
 
     @GetMapping("/forgot-password")
-    public String forgotPasswordPage() {
+    public String forgotPasswordPage(Model model) {
+        model.addAttribute("forgotDTO", new ForgotPasswordDTO());
         return "auth/forgot-password";
     }
 
     @PostMapping("/forgot-password")
-    public String forgotPassword(@RequestParam String email,
+    public String forgotPassword(@Valid @ModelAttribute("forgotDTO") ForgotPasswordDTO forgotDTO,
+                                 BindingResult result,
                                  RedirectAttributes redirectAttributes) {
-        passwordService.sendResetEmail(email);
-        redirectAttributes.addFlashAttribute("successMessage",
-                "If that email is registered, a password reset link has been sent.");
-        return "redirect:/forgot-password";
+        if (result.hasErrors()) {
+            return "auth/forgot-password";
+        }
+        try {
+            passwordService.sendResetEmail(forgotDTO.getEmail());
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Password reset link has been sent to your email.");
+            return "redirect:/forgot-password";
+        } catch (IllegalArgumentException e) {
+            result.rejectValue("email", "error.dto", e.getMessage());
+            return "auth/forgot-password";
+        }
     }
 
     @GetMapping("/reset-password")
@@ -46,10 +57,13 @@ public class PasswordController {
     }
 
     @PostMapping("/reset-password")
-    public String resetPassword(@Valid @ModelAttribute ResetPasswordDTO resetDTO,
+    public String resetPassword(@Valid @ModelAttribute("resetDTO") ResetPasswordDTO resetDTO,
                                 BindingResult result,
                                 Model model,
                                 RedirectAttributes redirectAttributes) {
+        if (!resetDTO.getPassword().equals(resetDTO.getPasswordConfirm())) {
+            result.rejectValue("passwordConfirm", "error.dto", "Passwords do not match.");
+        }
         if (result.hasErrors()) {
             return "auth/reset-password";
         }
@@ -71,12 +85,14 @@ public class PasswordController {
     }
 
     @PostMapping("/change-password")
-    public String changePassword(@Valid @ModelAttribute ChangePasswordDTO changeDTO,
+    public String changePassword(@Valid @ModelAttribute("changeDTO") ChangePasswordDTO changeDTO,
                                  BindingResult result,
-                                 Model model,
                                  @AuthenticationPrincipal StudyHubUserDetails userDetails,
                                  HttpServletRequest request,
                                  RedirectAttributes redirectAttributes) {
+        if (!changeDTO.getNewPassword().equals(changeDTO.getNewPasswordConfirm())) {
+            result.rejectValue("newPasswordConfirm", "error.dto", "Passwords do not match.");
+        }
         if (result.hasErrors()) {
             return "auth/change-password";
         }
@@ -87,7 +103,12 @@ public class PasswordController {
                     "Password changed. Please log in again.");
             return "redirect:/login";
         } catch (IllegalArgumentException e) {
-            model.addAttribute("errorMessage", e.getMessage());
+            String msg = e.getMessage();
+            if (msg.contains("Current password is incorrect")) {
+                result.rejectValue("currentPassword", "error.dto", msg);
+            } else {
+                result.rejectValue("newPasswordConfirm", "error.dto", msg);
+            }
             return "auth/change-password";
         }
     }
