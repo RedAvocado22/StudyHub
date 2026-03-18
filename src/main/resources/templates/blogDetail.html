@@ -94,10 +94,17 @@
                                         <div class="small text-dark" th:text="${co.comment}">Comment text...</div>
                                     </div>
                                     
-                                    <div class="ms-2 small">
-                                        <a class="text-decoration-none text-muted fw-semibold me-3" data-bs-toggle="collapse" th:href="'#replyBox-' + ${co.commentId}" role="button">
+                                    <div class="ms-2 small d-flex align-items-center gap-2">
+                                        <a class="text-decoration-none text-muted fw-semibold" data-bs-toggle="collapse" th:href="'#replyBox-' + ${co.commentId}" role="button">
                                             <i class="bi bi-reply me-1"></i>Reply
                                         </a>
+                                        <form th:if="${user != null and co.user.id == user.id}"
+                                              th:action="@{/blogs/{postId}/comments/{commentId}/delete(postId=${post.id},commentId=${co.commentId})}"
+                                              method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-link btn-sm text-danger p-0 text-decoration-none">
+                                                <i class="bi bi-trash me-1"></i>Delete
+                                            </button>
+                                        </form>
                                     </div>
 
                                     <!-- Reply Box -->
@@ -119,7 +126,16 @@
                                                     <i class="bi bi-person text-secondary small"></i>
                                                 </div>
                                                 <div class="flex-grow-1 bg-light p-2 rounded-3">
-                                                    <div class="fw-bold mb-0" style="font-size: 0.75rem;" th:text="${com.user.fullName}">Replier Name</div>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div class="fw-bold mb-0" style="font-size: 0.75rem;" th:text="${com.user.fullName}">Replier Name</div>
+                                                        <form th:if="${user != null and com.user.id == user.id}"
+                                                              th:action="@{/blogs/{postId}/comments/{commentId}/delete(postId=${post.id},commentId=${com.commentId})}"
+                                                              method="post" class="d-inline">
+                                                            <button type="submit" class="btn btn-link btn-sm text-danger p-0 text-decoration-none" style="font-size: 0.7rem;">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    </div>
                                                     <div style="font-size: 0.8rem;" th:text="${com.comment}">Reply text...</div>
                                                 </div>
                                             </div>
