@@ -1,5 +1,6 @@
 package com.studyhub.service;
 
+import com.studyhub.dto.CourseUpdateDTO;
 import com.studyhub.dto.CourseCardDTO;
 import com.studyhub.dto.CourseDetailDTO;
 import com.studyhub.dto.CourseListDTO;
@@ -104,6 +105,36 @@ public class CourseManagementService {
         return courseRepository.findWithDetailsById(id)
                 .map(this::toCourseDetailDTO)
                 .orElseThrow(() -> new NoSuchElementException("Course not found"));
+    }
+
+    @Transactional
+    public void updateCourse(Long id, CourseUpdateDTO dto) {
+        Course course = courseRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Course not found"));
+
+        course.setTitle(dto.getTitle());
+        course.setDescription(dto.getDescription());
+        course.setThumbnailUrl(dto.getThumbnailUrl());
+        course.setPrice(dto.getPrice());
+        course.setLevel(dto.getLevel());
+        course.setDurationHours(dto.getDurationHours());
+        course.setPublished(dto.isPublished());
+
+        if (dto.getCategoryId() != null) {
+            Setting category = settingRepository.findById(dto.getCategoryId())
+                    .orElseThrow(() -> new NoSuchElementException("Category not found"));
+            course.setCategory(category);
+        } else {
+            course.setCategory(null);
+        }
+
+        if (dto.getManagerId() != null) {
+            User manager = userRepository.findById(dto.getManagerId())
+                    .orElseThrow(() -> new NoSuchElementException("Manager not found"));
+            course.setManager(manager);
+        }
+
+        courseRepository.save(course);
     }
 
     public List<SettingListItemDTO> getCategories() {

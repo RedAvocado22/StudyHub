@@ -19,8 +19,14 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     @EntityGraph(attributePaths = "course")
     List<Enrollment> findByUserOrderByEnrolledAtDesc(User user);
 
+    @EntityGraph(attributePaths = "course")
+    List<Enrollment> findByUserAndStatusOrderByEnrolledAtDesc(User user, EnrollmentStatus status);
 
     Optional<Enrollment> findById(Long id);
+
+    boolean existsByUserAndCourse_IdAndStatus(User user, Long courseId, EnrollmentStatus status);
+
+    Optional<Enrollment> findByUserAndCourse_IdAndStatus(User user, Long courseId, EnrollmentStatus status);
 
     @Query(
             value = """
@@ -56,7 +62,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
             @Param("userId") Long userId,
             @Param("courseId") Long courseId,
             @Param("status") EnrollmentStatus status,
-            @Param("keyword")  String keyword,
+            @Param("keyword") String keyword,
             Pageable pageable
     );
     @Query("SELECT e.course.id FROM Enrollment e WHERE e.user.id = :userId")

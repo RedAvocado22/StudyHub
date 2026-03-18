@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin}">
+<head><title>New Post</title></head>
+<body>
+<div layout:fragment="content">
+
+    <div class="d-flex align-items-center gap-2 mb-4">
+        <a th:href="@{/admin/post/list}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Back
+        </a>
+        <h4 class="fw-bold mb-0">Create New Post</h4>
+        <button type="submit" form="postForm" class="btn btn-primary btn-sm ms-auto">
+            <i class="bi bi-plus-circle me-1"></i>Create Post
+        </button>
+    </div>
+
+    <form id="postForm" th:action="@{/admin/post/new}" th:object="${newPostDTO}" method="post" enctype="multipart/form-data">
+        <div class="row g-3">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-header bg-transparent fw-semibold">Post Content</div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label small text-muted mb-1">Title <span class="text-danger">*</span></label>
+                            <input type="text" th:field="*{title}" class="form-control"
+                                   th:classappend="${#fields.hasErrors('title')} ? 'is-invalid'"
+                                   placeholder="Enter post title">
+                            <div class="invalid-feedback" th:errors="*{title}"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small text-muted mb-1">Content <span class="text-danger">*</span></label>
+                            <textarea th:field="*{content}" id="editor1" class="form-control"
+                                      th:classappend="${#fields.hasErrors('content')} ? 'is-invalid'"></textarea>
+                            <div class="invalid-feedback" th:errors="*{content}"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-header bg-transparent fw-semibold">Post Settings</div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label small text-muted mb-1">Category</label>
+                            <select th:field="*{category}" class="form-select">
+                                <option th:each="c : ${categories}"
+                                        th:value="${c.id}"
+                                        th:text="${c.name}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small text-muted mb-1">Author</label>
+                            <input type="text" th:value="${user.fullName}" class="form-control bg-light" disabled>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small text-muted mb-1 d-block">Status</label>
+                            <div class="form-check form-check-inline">
+                                <input th:field="*{status}" value="Draft" class="form-check-input" type="radio" id="statusDraft" checked>
+                                <label class="form-check-label small" for="statusDraft">Draft</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input th:field="*{status}" value="Published" class="form-check-input" type="radio" id="statusPublished">
+                                <label class="form-check-label small" for="statusPublished">Published</label>
+                            </div>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input th:field="*{featured}" class="form-check-input" type="checkbox" id="featuredPost">
+                            <label class="form-check-label small" for="featuredPost">Featured Post</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-header bg-transparent fw-semibold">Thumbnail</div>
+                    <div class="card-body text-center">
+                        <div class="mb-3 d-flex justify-content-center">
+                            <div class="rounded border bg-light d-flex align-items-center justify-content-center overflow-hidden" 
+                                 style="width: 100%; height: 200px; max-width: 300px;">
+                                <img id="avatarPreview" src="/images/default-thumbnail.png" 
+                                     th:src="@{/images/default-thumbnail.png}"
+                                     class="w-100 h-100 object-fit-cover" alt="Preview">
+                            </div>
+                        </div>
+                        <label for="fileUpload" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-image me-1"></i>Select Image
+                        </label>
+                        <input type="file" id="fileUpload" name="imageFile" accept="image/*" 
+                               onchange="previewImage(this)" class="d-none">
+                        <div class="small text-muted mt-2">Recommended: 1200x630px (Max 5MB)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+    <script>
+        var editor = CKEDITOR.replace('editor1', {
+            height: 400,
+            removeButtons: 'PasteFromWord'
+        });
+        editor.on('change', function() {
+            editor.updateElement();
+        });
+
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                if (file.size > 5 * 1024 * 1024) {
+                    alert("File is too big! Maximum 5MB allowed.");
+                    input.value = "";
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('avatarPreview').src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
+</div>
+</body>
+</html>
