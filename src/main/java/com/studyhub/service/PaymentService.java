@@ -10,13 +10,17 @@ import com.studyhub.dto.EnrollRequestDTO;
 import com.studyhub.dto.PaymentResultDTO;
 import com.studyhub.enums.EnrollmentStatus;
 import com.studyhub.enums.PaymentMethod;
+import com.studyhub.enums.UserRole;
+import com.studyhub.enums.UserStatus;
 import com.studyhub.model.Course;
 import com.studyhub.model.Enrollment;
 import com.studyhub.model.User;
 import com.studyhub.repository.CourseRepository;
 import com.studyhub.repository.EnrollmentRepository;
+import com.studyhub.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.payos.PayOS;
@@ -29,20 +33,24 @@ import javax.crypto.spec.SecretKeySpec;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 @RequiredArgsConstructor
 public class PaymentService {
 
-
     private final VnPayConfig vnPayConfig;
     private final EnrollmentRepository enrollmentRepository;
     private final CourseRepository courseRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
     @Value("${app.base-url}")
     private String baseUrl;
@@ -55,13 +63,20 @@ public class PaymentService {
     @Value("${payos.checksum-key}")
     private String checksumKey;
     @Transactional
-    public PaymentResultDTO enroll(EnrollRequestDTO dto, User user) {
+    public PaymentResultDTO enroll(EnrollRequestDTO dto, User registrar) {
         Course course = courseRepository.findById(dto.getCourseId())
                 .orElseThrow(() -> new IllegalArgumentException("Course not found: " + dto.getCourseId()));
 
+        User enrolledUser = resolveOrCreateEnrolledUser(dto.getFullName(), dto.getEmail());
+
+        if (enrolledUser != null && enrollmentRepository.existsByUserAndCourse_IdAndStatus(
+                enrolledUser, course.getId(), EnrollmentStatus.APPROVED)) {
+            throw new IllegalArgumentException("This person is already enrolled and approved for this course.");
+        }
+
         Enrollment enrollment = new Enrollment();
         enrollment.setCourse(course);
-        enrollment.setUser(user);
+        enrollment.setUser(enrolledUser);
         enrollment.setFullName(dto.getFullName());
         enrollment.setEmail(dto.getEmail());
         enrollment.setMobile(dto.getMobile());
@@ -74,6 +89,11 @@ public class PaymentService {
 
         Enrollment saved = enrollmentRepository.save(enrollment);
 
+        emailService.sendEnrollmentNotificationToEnrollee(dto.getEmail(), dto.getFullName(), course.getTitle());
+        if (!registrar.getEmail().equalsIgnoreCase(dto.getEmail())) {
+            emailService.sendEnrollmentConfirmationToRegistrar(registrar, dto.getFullName(), course.getTitle());
+        }
+
         if (isFree) {
             return new PaymentResultDTO(true, "/enrollments/me", saved.getId());
         }
@@ -84,6 +104,41 @@ public class PaymentService {
         }
 
         return new PaymentResultDTO(true, null, saved.getId());
+    }
+
+    private User resolveOrCreateEnrolledUser(String fullName, String email) {
+        return userRepository.findByEmail(email).orElseGet(() -> {
+            String rawPassword = generatePassword();
+            User newUser = User.builder()
+                    .fullName(fullName)
+                    .email(email)
+                    .username(generateUsername(email))
+                    .password(passwordEncoder.encode(rawPassword))
+                    .role(UserRole.MEMBER)
+                    .status(UserStatus.ACTIVE)
+                    .build();
+            userRepository.save(newUser);
+            emailService.sendNewAccountEmail(newUser, rawPassword);
+            return newUser;
+        });
+    }
+
+    private String generateUsername(String email) {
+        String base = email.split("@")[0].replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
+        if (!userRepository.existsByUsername(base)) return base;
+        String candidate;
+        do {
+            candidate = base + ThreadLocalRandom.current().nextInt(100, 9999);
+        } while (userRepository.existsByUsername(candidate));
+        return candidate;
+    }
+
+    private String generatePassword() {
+        String chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+        SecureRandom random = new SecureRandom();
+        StringBuilder sb = new StringBuilder(10);
+        for (int i = 0; i < 10; i++) sb.append(chars.charAt(random.nextInt(chars.length())));
+        return sb.toString();
     }
 
     public  String createVnPayUrl(Long enrollmentId, String ipAddress) {
@@ -168,15 +223,8 @@ public class PaymentService {
         if (!"00".equals(params.get("vnp_ResponseCode"))) {
             return false;
         }
-        markPending(Long.parseLong(params.get("vnp_TxnRef")));
+        markPaid(Long.parseLong(params.get("vnp_TxnRef")));
         return true;
-    }
-
-    private void markPending(Long enrollmentId) {
-        Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
-                .orElseThrow(() -> new IllegalArgumentException("Enrollment not found: " + enrollmentId));
-        enrollment.setStatus(EnrollmentStatus.PENDING);
-        enrollmentRepository.save(enrollment);
     }
 
     private String createPayOSUrl(Enrollment enrollment) {

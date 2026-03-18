@@ -87,6 +87,7 @@ public class EnrollmentController {
     public String enrollForm(@PathVariable Long id,
                              @AuthenticationPrincipal StudyHubUserDetails principal,
                              Model model) {
+        if (principal == null) return "redirect:/login";
         User user = principal.getUser();
         CourseDetailDTO course = courseManagementService.findById(id);
 
@@ -109,6 +110,7 @@ public class EnrollmentController {
                                HttpServletRequest request,
                                Model model,
                                RedirectAttributes ra) {
+        if (principal == null) return "redirect:/login";
         if (result.hasErrors()) {
             model.addAttribute("dto", dto);
             model.addAttribute("course", courseManagementService.findById(id));
