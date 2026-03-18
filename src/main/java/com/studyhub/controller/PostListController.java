@@ -46,13 +46,20 @@ public class PostListController {
                               @RequestParam(required = false,name = "title") String title,
                               @RequestParam(required = false,name = "category") String category,
                               @RequestParam(required = false,name = "author") String author,
+                              @RequestParam(defaultValue = "updatedAt") String sortBy,
+                              @RequestParam(defaultValue = "desc") String direction,
                               Model model) {
         User user=userProfileService.getUserById(userDetails.getUser().getId());
 
         String searchTitle = (title != null && !title.trim().isEmpty()) ? title : null;
         String searchCategory = (category != null && !category.trim().isEmpty()) ? category : null;
         String searchAuthor = (author != null && !author.trim().isEmpty()) ? author : null;
-        List<Post> posts = postListService.filterPosts(searchTitle, searchCategory, searchAuthor);
+
+        org.springframework.data.domain.Sort sort = direction.equalsIgnoreCase("asc") ?
+                org.springframework.data.domain.Sort.by(sortBy).ascending() :
+                org.springframework.data.domain.Sort.by(sortBy).descending();
+
+        List<Post> posts = postListService.filterPosts(searchTitle, searchCategory, searchAuthor, sort);
         List<Setting> categories = postListService.getAllCategories();
         List<User> authors = postListService.getAllAuthors();
 
@@ -64,16 +71,23 @@ public class PostListController {
         model.addAttribute("title", title);
         model.addAttribute("category", category);
         model.addAttribute("author", author);
+        model.addAttribute("sortBy", sortBy);
+        model.addAttribute("direction", direction);
+
         return "postList";
     }
     @PostMapping("/filter")
     public String filterPosts( @RequestParam(required = false,name = "title") String title,
                                @RequestParam(required = false,name = "category") String category,
                                @RequestParam(required = false,name = "author") String author,
+                               @RequestParam(defaultValue = "updatedAt") String sortBy,
+                               @RequestParam(defaultValue = "desc") String direction,
                                RedirectAttributes ra) {
         ra.addAttribute("title", title);
         ra.addAttribute("category", category);
         ra.addAttribute("author", author);
+        ra.addAttribute("sortBy", sortBy);
+        ra.addAttribute("direction", direction);
         return "redirect:/admin/post/list";
     }
 
@@ -169,7 +183,8 @@ public class PostListController {
             List<Setting> categories = postListService.getAllCategories();
             model.addAttribute("user",user);
             model.addAttribute("categories",categories);
-            return "newPost";
+            model.addAttribute("id", id);
+            return "updatePost";
         }
         Post post=postListService.findPostById(id);
         post.setTitle(newPostDTO.getTitle());

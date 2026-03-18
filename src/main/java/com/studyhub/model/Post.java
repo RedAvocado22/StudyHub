@@ -17,6 +17,7 @@ public class Post {
     @Nationalized
     @Column(nullable = false, length = 100)
     private String title;
+    @Column(columnDefinition = "TEXT")
     private String content;
     private String status;
     @Column(name = "created_at",updatable = false)

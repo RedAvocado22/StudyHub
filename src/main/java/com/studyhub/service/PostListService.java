@@ -28,8 +28,8 @@ public class PostListService {
         return postRepository.findAllWithRelations();
     }
 
-    public List<Post> filterPosts(String title, String category, String author) {
-        return postRepository.filterPosts(title, category, author);
+    public List<Post> filterPosts(String title, String category, String author, org.springframework.data.domain.Sort sort) {
+        return postRepository.filterPosts(title, category, author, sort);
     }
 
     public List<Setting> getAllCategories() {

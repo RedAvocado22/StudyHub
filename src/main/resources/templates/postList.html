@@ -2,28 +2,30 @@
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/admin}">
-<head><title>Post List</title></head>
+<head><title>Post Management</title></head>
 <body>
 <div layout:fragment="content">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="fw-bold mb-0">Post List</h4>
+        <h4 class="fw-bold mb-0">Post Management</h4>
         <a th:href="@{/admin/post/new}" class="btn btn-primary btn-sm">
-            <i class="bi bi-person-plus me-1"></i>New Post
+            <i class="bi bi-plus-circle me-1"></i>New Post
         </a>
     </div>
 
     <div class="card border-0 shadow-sm mb-3">
         <div class="card-body">
             <form th:action="@{/admin/post/filter}" method="post" class="row g-2 align-items-end">
+                <input type="hidden" name="sortBy" th:value="${sortBy}">
+                <input type="hidden" name="direction" th:value="${direction}">
                 <div class="col-12 col-md-4">
                     <label class="form-label small text-muted mb-1">Title</label>
                     <input type="text" name="title" class="form-control form-control-sm"
-                           placeholder="Type title to search"
+                           placeholder="Search by title"
                            th:value="${title ?: ''}">
                 </div>
-                <div class="col-6 col-md-2">
-                    <label class="form-label small text-muted mb-1">Categories</label>
+                <div class="col-6 col-md-3">
+                    <label class="form-label small text-muted mb-1">Category</label>
                     <select name="category" class="form-select form-select-sm">
                         <option value="">All Categories</option>
                         <option th:each="c : ${categories}"
@@ -32,8 +34,8 @@
                                 th:selected="${c.name == category}"></option>
                     </select>
                 </div>
-                <div class="col-6 col-md-2">
-                    <label class="form-label small text-muted mb-1">Authors</label>
+                <div class="col-6 col-md-3">
+                    <label class="form-label small text-muted mb-1">Author</label>
                     <select name="author" class="form-select form-select-sm">
                         <option value="">All Authors</option>
                         <option th:each="a : ${authors}"
@@ -46,6 +48,7 @@
                     <button type="submit" class="btn btn-primary btn-sm">
                         <i class="bi bi-search me-1"></i>Search
                     </button>
+                    <a th:href="@{/admin/post/list}" class="btn btn-outline-secondary btn-sm ms-1">Reset</a>
                 </div>
             </form>
         </div>
@@ -57,14 +60,34 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                     <tr>
-                        <th>Id</th>
-                        <th>Title</th>
-                        <th>Category</th>
-                        <th>Author</th>
-                        <th>Comment</th>
+                        <th class="ps-3" style="width: 80px;">Thumbnail</th>
+                        <th>
+                            <a class="text-decoration-none text-dark small fw-bold" 
+                               th:href="@{/admin/post/list(title=${title},category=${category},author=${author},sortBy='title',direction=${sortBy == 'title' and direction == 'asc' ? 'desc' : 'asc'})}">
+                                Title <i class="bi bi-arrow-down-up ms-1"></i>
+                            </a>
+                        </th>
+                        <th>
+                            <a class="text-decoration-none text-dark small fw-bold" 
+                               th:href="@{/admin/post/list(title=${title},category=${category},author=${author},sortBy='category.name',direction=${sortBy == 'category.name' and direction == 'asc' ? 'desc' : 'asc'})}">
+                                Category <i class="bi bi-arrow-down-up ms-1"></i>
+                            </a>
+                        </th>
+                        <th>
+                            <a class="text-decoration-none text-dark small fw-bold" 
+                               th:href="@{/admin/post/list(title=${title},category=${category},author=${author},sortBy='author.fullName',direction=${sortBy == 'author.fullName' and direction == 'asc' ? 'desc' : 'asc'})}">
+                                Author <i class="bi bi-arrow-down-up ms-1"></i>
+                            </a>
+                        </th>
+                        <th>Comments</th>
                         <th>Status</th>
-                        <th>Updated At</th>
-                        <th>Actions</th>
+                        <th>
+                            <a class="text-decoration-none text-dark small fw-bold" 
+                               th:href="@{/admin/post/list(title=${title},category=${category},author=${author},sortBy='updatedAt',direction=${sortBy == 'updatedAt' and direction == 'asc' ? 'desc' : 'asc'})}">
+                                Updated <i class="bi bi-arrow-down-up ms-1"></i>
+                            </a>
+                        </th>
+                        <th></th>
                     </tr>
                     </thead>
                     <tbody>
@@ -72,25 +95,42 @@
                         <td colspan="8" class="text-center text-muted py-4">No posts found.</td>
                     </tr>
                     <tr th:each="p : ${posts}">
-                        <td class="text-muted small" th:text="${p.id}"></td>
-                        <td class="text-muted small" th:text="${p.title}"></td>
+                        <td class="ps-3">
+                            <img th:if="${p.thumbnail != null}" th:src="${p.thumbnail}" 
+                                 class="rounded object-fit-cover" style="width: 48px; height: 48px;" alt="Post thumbnail">
+                            <div th:unless="${p.thumbnail != null}" class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                <i class="bi bi-image text-muted"></i>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="fw-semibold" th:text="${p.title}"></div>
+                            <span th:if="${p.featuredPost}" class="badge bg-warning text-dark small" style="font-size: 0.7rem;">FEATURED</span>
+                        </td>
                         <td class="text-muted small" th:text="${p.category.name}"></td>
                         <td class="text-muted small" th:text="${p.author.fullName}"></td>
-                        <td class="text-muted small" th:text="${p.comments.size()}"></td>
+                        <td class="text-muted small">
+                            <i class="bi bi-chat-dots me-1"></i>
+                            <span th:text="${p.comments.size()}"></span>
+                        </td>
                         <td>
-                                <span class="text-muted small"
-                                      th:text="${p.status}">
-                                </span>
+                            <span class="badge rounded-pill"
+                                  th:text="${p.status}"
+                                  th:classappend="${p.status == 'Published' ? 'bg-success' : (p.status == 'Draft' ? 'bg-secondary' : 'bg-danger')}">
+                            </span>
                         </td>
                         <td class="text-muted small"
                             th:text="${#temporals.format(p.updatedAt, 'dd/MM/yyyy')}"></td>
-                        <td>
-                            <a th:href="@{/admin/post/update/{id}(id=${p.id})}"
-                               class="btn btn-sm btn-outline-primary">Edit
-                            </a>
-                            <a th:href="@{/admin/post/switch(status=${p.status},id=${p.id})}"
-                               class="btn btn-sm btn-outline-primary">Show
-                            </a>
+                        <td class="text-end pe-3">
+                            <div class="btn-group">
+                                <a th:href="@{/admin/post/update/{id}(id=${p.id})}"
+                                   class="btn btn-sm btn-outline-primary" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a th:href="@{/admin/post/switch(status=${p.status},id=${p.id})}"
+                                   class="btn btn-sm btn-outline-secondary" th:title="${p.status == 'Published' ? 'Hide' : 'Show'}">
+                                    <i th:class="${p.status == 'Published' ? 'bi bi-eye-slash' : 'bi bi-eye'}"></i>
+                                </a>
+                            </div>
                         </td>
                     </tr>
                     </tbody>
