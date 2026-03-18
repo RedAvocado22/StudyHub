@@ -39,7 +39,7 @@
                             </div>
                         </div>
 
-                        <div th:switch="${viewer.activeLesson.contentType}">
+                        <div th:switch="${viewer.activeLesson.contentType.name()}">
                             <div th:case="'VIDEO'">
                                 <div class="ratio ratio-16x9 rounded overflow-hidden">
                                     <iframe th:src="${viewer.activeLesson.contentUrl}"
@@ -49,15 +49,23 @@
                                 </div>
                             </div>
                             <div th:case="'PDF'">
-                                <div class="d-flex justify-content-end mb-2">
-                                    <a class="btn btn-outline-primary btn-sm"
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="text-muted small"><i class="bi bi-info-circle me-1"></i>If the PDF doesn't load, use the button on the right.</span>
+                                    <a class="btn btn-primary btn-sm"
                                        th:href="${viewer.activeLesson.contentUrl}" target="_blank">
-                                        <i class="bi bi-box-arrow-up-right me-1"></i>Open in new tab
+                                        <i class="bi bi-box-arrow-up-right me-1"></i>Open PDF in New Tab
                                     </a>
                                 </div>
-                                <div class="ratio ratio-4x3 border rounded overflow-hidden">
-                                    <iframe th:src="${viewer.activeLesson.contentUrl}"
-                                            title="PDF lesson"></iframe>
+                                <div class="ratio ratio-4x3 border rounded overflow-hidden bg-light">
+                                    <object th:data="${viewer.activeLesson.contentUrl}" type="application/pdf" width="100%" height="100%">
+                                        <div class="d-flex flex-column align-items-center justify-content-center h-100 p-4 text-center">
+                                            <i class="bi bi-file-earmark-pdf display-4 text-muted mb-3"></i>
+                                            <p>Unable to display PDF directly in the browser.</p>
+                                            <a th:href="${viewer.activeLesson.contentUrl}" class="btn btn-outline-primary" target="_blank">
+                                                Download / View PDF
+                                            </a>
+                                        </div>
+                                    </object>
                                 </div>
                             </div>
                             <div th:case="'TEXT'">
@@ -68,7 +76,10 @@
                                 </div>
                             </div>
                             <div th:case="*">
-                                <div class="text-muted">Unsupported lesson format.</div>
+                                <div class="alert alert-warning">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                    Unsupported lesson format: <strong th:text="${viewer.activeLesson.contentType}"></strong>
+                                </div>
                             </div>
                         </div>
                     </div>
