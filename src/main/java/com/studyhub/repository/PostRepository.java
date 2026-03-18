@@ -29,10 +29,12 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             (:title IS NULL OR p.title LIKE %:title%)
             AND (:category IS NULL OR p.category.name = :category)
             AND (:author IS NULL OR p.author.fullName = :author)
+            AND (:authorId IS NULL OR p.author.id = :authorId)
             """)
     List<Post> filterPosts(@Param("title") String title,
                            @Param("category") String category,
                            @Param("author") String author,
+                           @Param("authorId") Long authorId,
                            org.springframework.data.domain.Sort sort);
     @Query("""
            SELECT DISTINCT p FROM Post p

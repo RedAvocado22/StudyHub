@@ -41,9 +41,6 @@ public class LessonAccessService {
     public LessonViewerDTO getLessonViewer(String username, Long courseId, Long lessonId) {
         User user = userRepository.findByEmailOrUsername(username, username)
                 .orElseThrow(() -> new IllegalArgumentException("User not found."));
-        if (!enrollmentRepository.existsByUserAndCourse_IdAndStatus(user, courseId, EnrollmentStatus.APPROVED)) {
-            throw new IllegalArgumentException("You do not have access to this course.");
-        }
 
         Course course = courseRepository.findWithChaptersAndLessonsById(courseId)
                 .orElseThrow(() -> new IllegalArgumentException("Course not found."));
@@ -61,6 +58,12 @@ public class LessonAccessService {
         LessonViewerDTO.LessonItem activeLesson = resolveActiveLesson(chapters, lessonId);
         if (activeLesson == null) {
             throw new IllegalArgumentException("No active lessons found.");
+        }
+
+        if (!activeLesson.isPreview()) {
+            if (!enrollmentRepository.existsByUserAndCourse_IdAndStatus(user, courseId, EnrollmentStatus.APPROVED)) {
+                throw new IllegalArgumentException("You do not have access to this course.");
+            }
         }
 
         Long enrollmentId = enrollmentRepository

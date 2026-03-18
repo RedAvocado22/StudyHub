@@ -53,6 +53,16 @@ public class EnrollmentService {
         return dto;
     }
 
+    public java.util.Set<Long> getCourseIdsByStatus(Long userId, EnrollmentStatus status) {
+        return enrollmentRepository.findCourseIdsByUserIdAndStatus(userId, status);
+    }
+
+    public EnrollmentStatus findStatusByCourseAndUser(Long courseId, Long userId) {
+        return enrollmentRepository.findByCourse_IdAndUser_Id(courseId, userId)
+                .map(Enrollment::getStatus)
+                .orElse(null);
+    }
+
     public List<EnrollmentDTO> findByUsername(String username) {
         User user = userRepository.findByEmailOrUsername(username, username)
                 .orElseThrow(() -> new IllegalArgumentException("User not found."));

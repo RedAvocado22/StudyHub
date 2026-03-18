@@ -4,89 +4,133 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       layout:decorate="~{layout/base}">
 <head>
-    <title>User Profile</title>
+    <title>My Profile - StudyHub</title>
 </head>
 <body>
 <div layout:fragment="content">
-    <div class="container">
-        <div class="h2 mt-5 mb-3">
-            <a th:href="@{/profile}"
-               class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">
-                User Profile
-            </a>
-            <a th:href="@{/change-password}"
-               class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover ms-2">
-                Password Change
-            </a>
+    <!-- Header -->
+    <section class="bg-primary text-white py-4 mb-4">
+        <div class="container">
+            <h1 class="fw-bold mb-0">My Account</h1>
+            <p class="lead mb-0 small opacity-75">Manage your personal information and account settings.</p>
         </div>
-        <form th:action="@{/profile}" th:object="${userProfileDTO}" method="post" enctype="multipart/form-data">
-            <div class="row">
-                <div class="col">
-                    <div class="container mt-3">
-                        <div>
-                            <img th:src="${user.profileImage}"
-                                 class="img-thumbnail mx-auto d-block" alt="Avatar" id="avatarPreview">
-                            <div class="h5 text-center" th:text="${user.email}"></div>
-                        </div>
-                        <div class="mx-auto text-center">
+    </section>
+
+    <div class="container pb-5">
+        <div class="row g-4">
+            <!-- Sidebar / Avatar Section -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm text-center p-4 mb-4">
+                    <div class="position-relative d-inline-block mx-auto mb-4">
+                        <img th:src="${user.profileImage ?: '/images/default-avatar.png'}"
+                             class="rounded-circle border border-4 border-light shadow-sm object-fit-cover" 
+                             style="width: 140px; height: 140px;" alt="Avatar" id="avatarPreview">
+                        <label for="fileUpload" class="btn btn-primary btn-sm rounded-circle position-absolute bottom-0 end-0 shadow" 
+                               style="width: 32px; height: 32px; padding: 0; line-height: 32px;" title="Update Photo">
+                            <i class="bi bi-camera-fill"></i>
+                        </label>
+                        <input type="file" id="fileUpload" name="imageFile" form="profileForm" 
+                               accept="image/*" onchange="previewImage(this)" class="d-none">
+                    </div>
+                    <h4 class="fw-bold mb-1" th:text="${user.fullName}">Full Name</h4>
+                    <p class="text-muted small mb-3" th:text="${user.email}">user@example.com</p>
+                    <div class="d-flex justify-content-center gap-2">
+                        <span class="badge rounded-pill bg-primary-subtle text-primary px-3" th:text="${user.role}">Role</span>
+                        <span class="badge rounded-pill bg-success-subtle text-success px-3" th:text="${user.status ?: 'ACTIVE'}">Status</span>
+                    </div>
+                    <hr class="my-4">
+                    <div class="text-start">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-calendar-check text-primary me-3 fs-5"></i>
                             <div>
-                                <label for="fileUpload" class="btn btn-sm btn-outline-primary">Choose other image</label>
-                                <input type="file" id="fileUpload" name="imageFile" accept="image/*" onchange="previewImage(this)" hidden>
-                                <div class="lead">Accept PNG,JPG,GIF,Max 5 Mb</div>
+                                <div class="small text-muted">Joined Since</div>
+                                <div class="fw-semibold small" th:text="${#temporals.format(user.createdAt, 'dd MMM, yyyy') ?: 'N/A'}">Date</div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-shield-lock text-primary me-3 fs-5"></i>
+                            <div>
+                                <div class="small text-muted">Security</div>
+                                <a th:href="@{/change-password}" class="text-decoration-none small fw-semibold">Change Password</a>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col">
-                    <!-- Thông báo lỗi tổng quát (nếu có) -->
-                    <div th:if="${#fields.hasAnyErrors()}" class="alert alert-danger">
-                        Vui lòng sửa các lỗi bên dưới!
+            </div>
+
+            <!-- Profile Form Section -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-transparent p-4 border-bottom">
+                        <h5 class="fw-bold mb-0">Personal Information</h5>
                     </div>
-                    <label for="l1" class="form-label">Full Name*</label>
-                    <input type="text" th:field="*{fullName}" class="form-control" placeholder="Full Name" id="l1">
-                    <div th:if="${#fields.hasErrors('fullName')}"
-                       th:errors="*{fullName}"
-                        class="text-danger">
+                    <div class="card-body p-4 p-md-5">
+                        <form id="profileForm" th:action="@{/profile}" th:object="${userProfileDTO}" method="post" enctype="multipart/form-data">
+                            
+                            <div th:if="${#fields.hasAnyErrors()}" class="alert alert-danger border-0 small mb-4">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>Please correct the errors below.
+                            </div>
+
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <label class="form-label small text-muted mb-1">Full Name <span class="text-danger">*</span></label>
+                                    <input type="text" th:field="*{fullName}" class="form-control" 
+                                           th:classappend="${#fields.hasErrors('fullName')} ? 'is-invalid'"
+                                           placeholder="John Doe">
+                                    <div class="invalid-feedback" th:errors="*{fullName}"></div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label class="form-label small text-muted mb-1">Username <span class="text-danger">*</span></label>
+                                    <input type="text" th:field="*{username}" class="form-control" 
+                                           th:classappend="${#fields.hasErrors('username')} ? 'is-invalid'"
+                                           placeholder="johndoe">
+                                    <div class="invalid-feedback" th:errors="*{username}"></div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label small text-muted mb-1">Mobile Number</label>
+                                    <input type="text" th:field="*{mobile}" class="form-control" 
+                                           th:classappend="${#fields.hasErrors('mobile')} ? 'is-invalid'"
+                                           placeholder="+1 234 567 890">
+                                    <div class="invalid-feedback" th:errors="*{mobile}"></div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label small text-muted mb-1">Role</label>
+                                    <select class="form-select bg-light" th:field="*{role}" disabled>
+                                        <option th:each="r : ${roles}" th:value="${r}" th:text="${r}"></option>
+                                    </select>
+                                    <input type="hidden" th:field="*{role}">
+                                    <div class="small text-muted mt-1">Role cannot be changed by user.</div>
+                                </div>
+                            </div>
+
+                            <div class="mt-5 pt-3 border-top">
+                                <button type="submit" class="btn btn-primary px-5 shadow-sm">
+                                    <i class="bi bi-save me-2"></i>Save Changes
+                                </button>
+                                <a th:href="@{/profile}" class="btn btn-outline-secondary px-4 ms-2">Discard</a>
+                            </div>
+                        </form>
                     </div>
-                    <label for="l2" class="form-label">Mobile</label>
-                    <input type="text" th:field="*{mobile}" class="form-control" placeholder="Mobile" id="l2">
-                    <div th:if="${#fields.hasErrors('mobile')}"
-                         th:errors="*{mobile}"
-                         class="text-danger">
-                    </div>
-                    <label for="l3" class="form-label">Username*</label>
-                    <input type="text" th:field="*{username}" class="form-control" placeholder="Username" id="l3">
-                    <div th:if="${#fields.hasErrors('username')}"
-                         th:errors="*{username}"
-                         class="text-danger">
-                    </div>
-                    <label for="l4" class="form-label">Role</label>
-                    <select class="form-select" th:field="*{role}" id="l4">
-                        <option th:each="r : ${roles}" th:value="${r}" th:text="${r}"></option>
-                    </select>
-                    <button type="submit" class="btn btn-primary mb-3 mt-3">Submit</button>
                 </div>
             </div>
-        </form>
+        </div>
     </div>
 
     <script>
         function previewImage(input) {
             if (input.files && input.files[0]) {
                 const file = input.files[0];
-
-                // 1. Kiểm tra kích thước file (Option: 5MB)
                 if (file.size > 5 * 1024 * 1024) {
                     alert("File is too big! Maximum 5MB allowed.");
-                    input.value = ""; // Reset input
+                    input.value = "";
                     return;
                 }
-
-                // 2. Đọc file và hiển thị preview
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    const preview = document.getElementById('avatarPreview');
-                    preview.src = e.target.result; // Thay đổi src của ảnh thành dữ liệu Base64
+                    document.getElementById('avatarPreview').src = e.target.result;
                 }
                 reader.readAsDataURL(file);
             }

@@ -87,14 +87,11 @@ public class BlogsController {
     public String postComment(@AuthenticationPrincipal StudyHubUserDetails userDetails,
                               @RequestParam("postId") Long postId,
                               @RequestParam("comment") String commentContent,
-                              @RequestParam(name="parentId",required=false) Long parentId,
+                              @RequestParam(name = "parentId", required = false) Long parentId,
                               RedirectAttributes ra) {
-
-        // 1. Lấy thông tin bài viết và người dùng
         Post post = postListService.findPostById(postId);
-        User user = userDetails.getUser(); // Hoặc lấy từ DB nếu cần object managed
-        // 2. Tạo đối tượng Comment mới
-        Comment.CommentBuilder commentBuilder  = Comment.builder()
+        User user = userDetails.getUser();
+        Comment.CommentBuilder commentBuilder = Comment.builder()
                 .comment(commentContent)
                 .post(post)
                 .user(user);
@@ -103,7 +100,19 @@ public class BlogsController {
             commentBuilder.parent(parentComment);
         }
         postListService.saveComment(commentBuilder.build());
+        return "redirect:/blogs/detail?id=" + postId;
+    }
 
+    @PostMapping("/{postId}/comments/{commentId}/delete")
+    public String deleteComment(@AuthenticationPrincipal StudyHubUserDetails userDetails,
+                                @PathVariable Long postId,
+                                @PathVariable Long commentId,
+                                RedirectAttributes ra) {
+        try {
+            postListService.deleteComment(commentId, userDetails.getUser().getId());
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", e.getMessage());
+        }
         return "redirect:/blogs/detail?id=" + postId;
     }
 

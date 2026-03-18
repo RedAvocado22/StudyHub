@@ -7,6 +7,7 @@ import com.studyhub.dto.UserListDTO;
 import com.studyhub.enums.UserRole;
 import com.studyhub.enums.UserStatus;
 import com.studyhub.model.User;
+import com.studyhub.repository.EnrollmentRepository;
 import com.studyhub.repository.UserRepository;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class UserManagementService {
 
     private final UserRepository userRepository;
+    private final EnrollmentRepository enrollmentRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
 
@@ -104,6 +106,14 @@ public class UserManagementService {
         userRepository.save(user);
         emailService.sendNewAccountEmail(user, rawPassword);
         return user;
+    }
+
+    @Transactional
+    public void deleteUser(Long id) {
+        if (enrollmentRepository.existsByUser_Id(id)) {
+            throw new IllegalStateException("Cannot delete a user who has enrollment records.");
+        }
+        userRepository.deleteById(id);
     }
 
     @Transactional
