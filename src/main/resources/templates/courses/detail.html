@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout/base}">
+<head>
+    <title th:text="${course.title + ' - StudyHub'}">Course Detail</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <!-- Hero Banner -->
+    <section class="bg-dark text-white py-5">
+        <div class="container py-2">
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a th:href="@{/courses}" class="text-white-50 text-decoration-none">Courses</a>
+                    </li>
+                    <li class="breadcrumb-item active text-white" aria-current="page"
+                        th:text="${#strings.abbreviate(course.title, 40)}"></li>
+                </ol>
+            </nav>
+            <div class="row align-items-center g-4">
+                <div class="col-lg-8">
+                    <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
+                        <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill"
+                              th:text="${course.categoryName}"></span>
+                        <span class="badge rounded-pill px-3 py-2"
+                              th:classappend="${course.level.name() == 'BEGINNER' ? 'bg-success' :
+                                               course.level.name() == 'INTERMEDIATE' ? 'bg-warning text-dark' : 'bg-danger'}"
+                              th:text="${course.level}"></span>
+                    </div>
+                    <h1 class="display-6 fw-bold mb-3" th:text="${course.title}"></h1>
+                    <p class="lead text-white-50 mb-4"
+                       th:text="${#strings.abbreviate(course.description ?: '', 200)}"></p>
+                    <div class="d-flex align-items-center gap-4 flex-wrap text-white-50 small">
+                        <span th:if="${course.durationHours != null}">
+                            <i class="bi bi-clock me-1"></i>
+                            <span th:text="${course.durationHours} + ' hours'"></span>
+                        </span>
+                        <span>
+                            <i class="bi bi-person-fill me-1"></i>
+                            Instructor: <span class="text-white" th:text="${course.managerName}"></span>
+                        </span>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow-lg">
+                        <div class="ratio ratio-16x9">
+                            <img th:if="${course.thumbnailUrl != null}"
+                                 th:src="${course.thumbnailUrl}"
+                                 th:alt="${course.title}"
+                                 class="rounded-top object-fit-cover">
+                            <div th:unless="${course.thumbnailUrl != null}"
+                                 class="bg-secondary bg-opacity-25 rounded-top d-flex align-items-center justify-content-center">
+                                <i class="bi bi-play-circle display-3 text-secondary"></i>
+                            </div>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-baseline gap-2 mb-3">
+                                <span class="h3 fw-bold text-primary mb-0"
+                                      th:text="${#numbers.formatDecimal(course.price, 1, 'COMMA', 0, 'NONE') + ' ₫'}"></span>
+                            </div>
+
+                            <!-- CTA: Approved -->
+                            <a th:if="${enrollmentStatus != null and enrollmentStatus.name() == 'APPROVED'}"
+                               th:href="@{/my-courses/{id}/lessons(id=${course.id})}"
+                               class="btn btn-success w-100 py-2 fw-semibold mb-2">
+                                <i class="bi bi-play-circle me-2"></i>Continue Learning
+                            </a>
+
+                            <!-- CTA: Pending -->
+                            <div th:if="${enrollmentStatus != null and enrollmentStatus.name() == 'PENDING'}"
+                                 class="btn btn-warning w-100 py-2 fw-semibold mb-2 disabled">
+                                <i class="bi bi-hourglass-split me-2"></i>Enrollment Pending
+                            </div>
+
+                            <!-- CTA: Not enrolled / Rejected / Guest -->
+                            <a th:unless="${enrollmentStatus != null and (enrollmentStatus.name() == 'APPROVED' or enrollmentStatus.name() == 'PENDING')}"
+                               th:href="@{/courses/{id}/enroll(id=${course.id})}"
+                               class="btn btn-primary w-100 py-2 fw-semibold mb-2">
+                                <i class="bi bi-pencil-square me-2"></i>Enroll Now
+                            </a>
+
+                            <a th:if="${enrollmentStatus != null and enrollmentStatus.name() == 'APPROVED'}"
+                               th:href="@{/enrollments/me}"
+                               class="btn btn-outline-secondary w-100 btn-sm">
+                                <i class="bi bi-list-check me-1"></i>View My Enrollments
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Body -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row g-4">
+
+                <!-- Left: About + Curriculum -->
+                <div class="col-lg-8">
+
+                    <!-- About -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-body p-4">
+                            <h4 class="fw-bold mb-3">About This Course</h4>
+                            <div class="text-muted lh-lg" th:text="${course.description}"></div>
+                        </div>
+                    </div>
+
+                    <!-- Curriculum -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-transparent p-4 border-bottom">
+                            <h4 class="fw-bold mb-0">
+                                <i class="bi bi-list-ul me-2"></i>Course Content
+                            </h4>
+                        </div>
+                        <div class="card-body p-0">
+                            <div th:if="${chapters.empty}" class="text-center text-muted py-5">
+                                <i class="bi bi-collection display-4 d-block mb-2"></i>
+                                <p class="mb-0">No content available yet.</p>
+                            </div>
+
+                            <div class="accordion accordion-flush" id="curriculumAccordion"
+                                 th:unless="${chapters.empty}">
+                                <div class="accordion-item" th:each="chapter, iterStat : ${chapters}"
+                                     th:if="${chapter.active}">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button fw-semibold"
+                                                th:classappend="${iterStat.index > 0 ? 'collapsed' : ''}"
+                                                type="button"
+                                                data-bs-toggle="collapse"
+                                                th:data-bs-target="'#chapter-' + ${chapter.id}"
+                                                th:aria-expanded="${iterStat.index == 0 ? 'true' : 'false'}">
+                                            <span th:text="${chapter.title}"></span>
+                                            <span class="ms-auto me-3 badge bg-secondary-subtle text-secondary small fw-normal"
+                                                  th:if="${chapter.lessons != null}"
+                                                  th:text="${#lists.size(chapter.lessons)} + ' lessons'"></span>
+                                        </button>
+                                    </h2>
+                                    <div th:id="'chapter-' + ${chapter.id}"
+                                         class="accordion-collapse collapse"
+                                         th:classappend="${iterStat.index == 0 ? 'show' : ''}">
+                                        <div class="accordion-body p-0">
+                                            <ul class="list-group list-group-flush" th:if="${chapter.lessons != null}">
+                                                <li th:each="lesson : ${chapter.lessons}"
+                                                    th:if="${lesson.active}"
+                                                    class="list-group-item d-flex align-items-center px-4 py-3">
+                                                    <i class="bi me-3 text-primary"
+                                                       th:classappend="${lesson.contentType.name() == 'VIDEO' ? 'bi-play-circle' :
+                                                                         lesson.contentType.name() == 'PDF' ? 'bi-file-pdf' : 'bi-file-text'}"></i>
+                                                    <span class="flex-grow-1" th:text="${lesson.title}"></span>
+                                                    <span th:if="${lesson.preview}"
+                                                          class="badge bg-success-subtle text-success small me-2">Preview</span>
+                                                    <a th:if="${lesson.preview and enrollmentStatus == null}"
+                                                       th:href="@{/my-courses/{cid}/lessons(cid=${course.id},lessonId=${lesson.id})}"
+                                                       class="btn btn-link btn-sm p-0 text-primary text-decoration-none me-2">
+                                                        Watch Free
+                                                    </a>
+                                                    <span class="text-muted small"
+                                                          th:if="${lesson.durationMinutes != null}"
+                                                          th:text="${lesson.durationMinutes} + ' min'"></span>
+                                                    <i th:unless="${lesson.preview or enrollmentStatus != null}"
+                                                       class="bi bi-lock text-muted ms-2"></i>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Details sidebar -->
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-body p-4">
+                            <h5 class="fw-bold mb-3">Course Details</h5>
+                            <ul class="list-unstyled mb-0">
+                                <li class="d-flex justify-content-between py-2 border-bottom">
+                                    <span class="text-muted"><i class="bi bi-bar-chart me-2"></i>Level</span>
+                                    <span class="fw-semibold" th:text="${course.level}"></span>
+                                </li>
+                                <li class="d-flex justify-content-between py-2 border-bottom"
+                                    th:if="${course.durationHours != null}">
+                                    <span class="text-muted"><i class="bi bi-clock me-2"></i>Duration</span>
+                                    <span class="fw-semibold" th:text="${course.durationHours} + ' hours'"></span>
+                                </li>
+                                <li class="d-flex justify-content-between py-2 border-bottom">
+                                    <span class="text-muted"><i class="bi bi-tag me-2"></i>Category</span>
+                                    <span class="fw-semibold" th:text="${course.categoryName}"></span>
+                                </li>
+                                <li class="d-flex justify-content-between py-2">
+                                    <span class="text-muted"><i class="bi bi-person me-2"></i>Instructor</span>
+                                    <span class="fw-semibold" th:text="${course.managerName}"></span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Enrollment status card for logged-in users -->
+                    <div class="card border-0 shadow-sm" th:if="${enrollmentStatus != null}">
+                        <div class="card-body p-4 text-center">
+                            <div th:if="${enrollmentStatus.name() == 'APPROVED'}">
+                                <i class="bi bi-check-circle-fill text-success display-5 d-block mb-2"></i>
+                                <p class="fw-semibold mb-1">You're enrolled!</p>
+                                <p class="text-muted small mb-3">You have full access to this course.</p>
+                                <a th:href="@{/my-courses/{id}/lessons(id=${course.id})}"
+                                   class="btn btn-success btn-sm px-4">
+                                    <i class="bi bi-play me-1"></i>Start Learning
+                                </a>
+                            </div>
+                            <div th:if="${enrollmentStatus.name() == 'PENDING'}">
+                                <i class="bi bi-hourglass-split text-warning display-5 d-block mb-2"></i>
+                                <p class="fw-semibold mb-1">Awaiting approval</p>
+                                <p class="text-muted small mb-0">Your enrollment is under review.</p>
+                            </div>
+                            <div th:if="${enrollmentStatus.name() == 'REJECTED'}">
+                                <i class="bi bi-x-circle-fill text-danger display-5 d-block mb-2"></i>
+                                <p class="fw-semibold mb-1">Enrollment rejected</p>
+                                <p class="text-muted small mb-3">You may apply again.</p>
+                                <a th:href="@{/courses/{id}/enroll(id=${course.id})}"
+                                   class="btn btn-primary btn-sm px-4">Re-apply</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</div>
+</body>
+</html>
