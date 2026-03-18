@@ -7,13 +7,13 @@ import lombok.Data;
 @Data
 public class ChangePasswordDTO {
 
-    @NotBlank
+    @NotBlank(message = "Current password is required")
     private String currentPassword;
 
-    @NotBlank
-    @Size(min = 8)
+    @NotBlank(message = "New password is required")
+    @Size(min = 8, message = "Password must be at least 8 characters")
     private String newPassword;
 
-    @NotBlank
+    @NotBlank(message = "Please confirm your new password")
     private String newPasswordConfirm;
 }

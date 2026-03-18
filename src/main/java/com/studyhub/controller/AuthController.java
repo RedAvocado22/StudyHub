@@ -35,6 +35,9 @@ public class AuthController {
                            BindingResult result,
                            Model model,
                            RedirectAttributes redirectAttributes) {
+        if (!registerDTO.getPassword().equals(registerDTO.getPasswordConfirm())) {
+            result.rejectValue("passwordConfirm", "error.dto", "Passwords do not match.");
+        }
         if (result.hasErrors()) {
             return "auth/register";
         }
@@ -44,7 +47,7 @@ public class AuthController {
                     "Registration successful! Please check your email to verify your account.");
             return "redirect:/login";
         } catch (IllegalArgumentException e) {
-            model.addAttribute("errorMessage", e.getMessage());
+            result.rejectValue("email", "error.dto", e.getMessage());
             return "auth/register";
         }
     }

@@ -10,10 +10,10 @@ public class ResetPasswordDTO {
     @NotBlank
     private String token;
 
-    @NotBlank
-    @Size(min = 8)
+    @NotBlank(message = "Password is required")
+    @Size(min = 8, message = "Password must be at least 8 characters")
     private String password;
 
-    @NotBlank
+    @NotBlank(message = "Please confirm your password")
     private String passwordConfirm;
 }

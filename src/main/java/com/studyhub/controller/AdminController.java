@@ -5,6 +5,7 @@ import com.studyhub.dto.LessonDTO;
 import com.studyhub.dto.CourseUpdateDTO;
 import com.studyhub.dto.CourseDetailDTO;
 import com.studyhub.dto.CreateUserDTO;
+import com.studyhub.dto.UpdateUserDTO;
 import com.studyhub.model.User;
 import com.studyhub.enums.CourseLevel;
 import com.studyhub.enums.UserRole;
@@ -15,7 +16,9 @@ import com.studyhub.service.FileUploadService;
 import com.studyhub.service.UserManagementService;
 import org.springframework.web.multipart.MultipartFile;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.BindingResult;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -87,9 +90,16 @@ public class AdminController {
     }
 
     @PostMapping("/users")
-    public String createUser(@ModelAttribute CreateUserDTO createUserDTO,
+    public String createUser(@Valid @ModelAttribute CreateUserDTO createUserDTO,
+                             BindingResult result,
                              @RequestParam(required = false) MultipartFile avatar,
+                             Model model,
                              RedirectAttributes redirectAttributes) {
+        if (result.hasErrors()) {
+            model.addAttribute("roles", UserRole.values());
+            model.addAttribute("statuses", UserStatus.values());
+            return "admin/users/create";
+        }
         try {
             if (avatar != null && !avatar.isEmpty()) {
                 createUserDTO.setProfileImageUrl(fileUploadService.uploadImage(avatar));
@@ -98,8 +108,10 @@ public class AdminController {
             redirectAttributes.addFlashAttribute("successMessage", "User created and credentials sent to " + user.getEmail() + ".");
             return "redirect:/admin/users/" + user.getId();
         } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/admin/users/new";
+            result.rejectValue("email", "error.dto", e.getMessage());
+            model.addAttribute("roles", UserRole.values());
+            model.addAttribute("statuses", UserStatus.values());
+            return "admin/users/create";
         }
     }
 
@@ -114,10 +126,47 @@ public class AdminController {
             redirectAttributes.addFlashAttribute("infoMessage", "To edit your own account, go to your profile.");
             return "redirect:/profile";
         }
-        model.addAttribute("user", userManagementService.findById(id));
+        var user = userManagementService.findById(id);
+        model.addAttribute("user", user);
         model.addAttribute("roles", UserRole.values());
         model.addAttribute("statuses", UserStatus.values());
+        UpdateUserDTO updateUserDTO = new UpdateUserDTO();
+        updateUserDTO.setFullName(user.getFullName());
+        updateUserDTO.setEmail(user.getEmail());
+        updateUserDTO.setUsername(user.getUsername());
+        updateUserDTO.setMobile(user.getMobile());
+        model.addAttribute("updateUserDTO", updateUserDTO);
         return "admin/users/detail";
+    }
+
+    @PostMapping("/users/{id}")
+    public String updateUserInfo(@PathVariable Long id,
+                                 @Valid @ModelAttribute UpdateUserDTO updateUserDTO,
+                                 BindingResult result,
+                                 Model model,
+                                 RedirectAttributes redirectAttributes) {
+        if (result.hasErrors()) {
+            model.addAttribute("user", userManagementService.findById(id));
+            model.addAttribute("roles", UserRole.values());
+            model.addAttribute("statuses", UserStatus.values());
+            return "admin/users/detail";
+        }
+        try {
+            userManagementService.updateInfo(id, updateUserDTO);
+            redirectAttributes.addFlashAttribute("successMessage", "User info updated successfully.");
+        } catch (IllegalArgumentException e) {
+            String msg = e.getMessage();
+            if (msg.contains("email")) {
+                result.rejectValue("email", "error.dto", msg);
+            } else {
+                result.rejectValue("username", "error.dto", msg);
+            }
+            model.addAttribute("user", userManagementService.findById(id));
+            model.addAttribute("roles", UserRole.values());
+            model.addAttribute("statuses", UserStatus.values());
+            return "admin/users/detail";
+        }
+        return "redirect:/admin/users/" + id;
     }
 
     @PostMapping("/users/{id}/status")
