@@ -26,4 +26,7 @@ public interface CourseRepository extends JpaRepository<Course, Long>, JpaSpecif
 
     @EntityGraph(attributePaths = {"category", "manager"})
     Optional<Course> findWithDetailsById(Long id);
+
+    @EntityGraph(attributePaths = {"chapters", "chapters.lessons", "manager"})
+    Optional<Course> findWithChaptersAndLessonsById(Long id);
 }

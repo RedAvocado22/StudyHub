@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title th:text="${viewer.courseTitle} + ' Lessons'">Lessons Viewer</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container-fluid py-4">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
+            <div class="d-flex align-items-center gap-2">
+                <a class="btn btn-outline-secondary btn-sm" th:href="@{/my-courses}">
+                    <i class="bi bi-arrow-left"></i>
+                    Back
+                </a>
+                <div>
+                    <h4 class="fw-bold mb-0" th:text="${viewer.courseTitle}">Course Title</h4>
+                    <span class="text-muted small">Lessons Viewer</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                            <div>
+                                <h5 class="fw-semibold mb-1" th:text="${viewer.activeLesson.title}">Lesson Title</h5>
+                                <div class="d-flex align-items-center gap-2 text-muted small">
+                                    <span class="badge bg-light text-dark border"
+                                          th:text="${viewer.activeLesson.contentType}">VIDEO</span>
+                                    <span th:if="${viewer.activeLesson.durationMinutes != null}">
+                                        <i class="bi bi-clock"></i>
+                                        <span th:text="${viewer.activeLesson.durationMinutes} + ' min'"></span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div th:switch="${viewer.activeLesson.contentType.name()}">
+                            <div th:case="'VIDEO'">
+                                <div class="ratio ratio-16x9 rounded overflow-hidden">
+                                    <iframe th:src="${viewer.activeLesson.contentUrl}"
+                                            title="Video lesson"
+                                            allowfullscreen
+                                            referrerpolicy="strict-origin-when-cross-origin"></iframe>
+                                </div>
+                            </div>
+                            <div th:case="'PDF'">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="text-muted small"><i class="bi bi-info-circle me-1"></i>If the PDF doesn't load, use the button on the right.</span>
+                                    <a class="btn btn-primary btn-sm"
+                                       th:href="${viewer.activeLesson.contentUrl}" target="_blank">
+                                        <i class="bi bi-box-arrow-up-right me-1"></i>Open PDF in New Tab
+                                    </a>
+                                </div>
+                                <div class="ratio ratio-4x3 border rounded overflow-hidden bg-light">
+                                    <object th:data="${viewer.activeLesson.contentUrl}" type="application/pdf" width="100%" height="100%">
+                                        <div class="d-flex flex-column align-items-center justify-content-center h-100 p-4 text-center">
+                                            <i class="bi bi-file-earmark-pdf display-4 text-muted mb-3"></i>
+                                            <p>Unable to display PDF directly in the browser.</p>
+                                            <a th:href="${viewer.activeLesson.contentUrl}" class="btn btn-outline-primary" target="_blank">
+                                                Download / View PDF
+                                            </a>
+                                        </div>
+                                    </object>
+                                </div>
+                            </div>
+                            <div th:case="'TEXT'">
+                                <div class="border rounded-3 p-4 bg-light-subtle">
+                                    <div th:utext="${viewer.activeLesson.contentText}">
+                                        Lesson content goes here.
+                                    </div>
+                                </div>
+                            </div>
+                            <div th:case="*">
+                                <div class="alert alert-warning">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                    Unsupported lesson format: <strong th:text="${viewer.activeLesson.contentType}"></strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-white fw-semibold">Course Content</div>
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item" th:each="chapter : ${viewer.chapters}">
+                            <div class="fw-semibold" th:text="${chapter.title}">Chapter Title</div>
+                            <p class="text-muted small mb-2" th:text="${chapter.description}">Chapter description</p>
+                            <div class="list-group list-group-flush">
+                                <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                                   th:each="lesson : ${chapter.lessons}"
+                                   th:href="@{/my-courses/{courseId}/lessons(courseId=${viewer.courseId}, lessonId=${lesson.id})}"
+                                   th:classappend="${lesson.id == viewer.activeLesson.id} ? 'active' : ''">
+                                    <div>
+                                        <div class="fw-semibold" th:text="${lesson.title}">Lesson Title</div>
+                                        <div class="text-muted small">
+                                            <span th:text="${lesson.contentType}">VIDEO</span>
+                                            <span th:if="${lesson.durationMinutes != null}" th:text="' · ' + ${lesson.durationMinutes} + ' min'"></span>
+                                        </div>
+                                    </div>
+                                    <i class="bi bi-play-circle"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
