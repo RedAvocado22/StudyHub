@@ -5,9 +5,11 @@
 <nav th:fragment="pagination(page, baseUrl, queryString)" aria-label="Pagination"
      th:if="${page.totalPages > 1}">
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+
         <small class="text-muted">
             Showing
-            <span th:text="${page.number * page.size + 1}"></span>–<span th:text="${T(java.lang.Math).min((page.number + 1) * page.size, page.totalElements)}"></span>
+            <span th:text="${page.number * page.size + 1}"></span>–<span
+                th:text="${page.number * page.size + page.numberOfElements}"></span>
             of <span th:text="${page.totalElements}"></span> results
         </small>
 
@@ -20,14 +22,18 @@
             </li>
 
             <th:block th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}">
-                <li class="page-item" th:classappend="${i == page.number} ? 'active'"
-                    th:if="${i == 0 or i == page.totalPages - 1 or (i >= page.number - 2 and i <= page.number + 2)}">
+                <li class="page-item"
+                    th:classappend="${i == page.number} ? 'active'"
+                    th:if="${i == 0
+                             or i == page.totalPages - 1
+                             or (i >= page.number - 2 and i <= page.number + 2)}">
                     <a class="page-link"
                        th:href="${baseUrl + '?page=' + i + queryString}"
                        th:text="${i + 1}"></a>
                 </li>
                 <li class="page-item disabled"
-                    th:if="${(i == 1 and page.number > 3) or (i == page.totalPages - 2 and page.number < page.totalPages - 4)}">
+                    th:if="${(i == 1 and page.number > 3)
+                             or (i == page.totalPages - 2 and page.number < page.totalPages - 4)}">
                     <span class="page-link">…</span>
                 </li>
             </th:block>
@@ -44,13 +50,14 @@
             <label class="text-muted small mb-0">Rows:</label>
             <select class="form-select form-select-sm" style="width: auto;"
                     onchange="window.location.href = this.dataset.base + '?page=0' + this.dataset.query + '&size=' + this.value"
-                    th:attr="data-base=${baseUrl}, data-query=${#strings.replace(queryString, '&size=' + page.size, '')}">
-                <option th:each="s : ${#arrays.toIntArray({10, 20, 50})}"
-                        th:value="${s}"
-                        th:text="${s}"
-                        th:selected="${s == page.size}"></option>
+                    th:attr="data-base=${baseUrl},
+                             data-query=${#strings.replace(queryString, '&size=' + page.size, '')}">
+                <option value="10" th:selected="${page.size == 10}">10</option>
+                <option value="20" th:selected="${page.size == 20}">20</option>
+                <option value="50" th:selected="${page.size == 50}">50</option>
             </select>
         </div>
+
     </div>
 </nav>
 

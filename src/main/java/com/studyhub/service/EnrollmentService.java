@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -160,5 +161,8 @@ public class EnrollmentService {
         dto.setEnrolledAt(e.getEnrolledAt());
         dto.setLastUpdated(e.getLastUpdated());
         return dto;
+    }
+    public Set<Long> findEnrolledCourseIdsByUser(Long userId) {
+        return enrollmentRepository.findCourseIdsByUserId(userId);
     }
 }

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Learning Enrollment - StudyHub</title>
+    <style>
+        .enroll-step { position: relative; padding-bottom: 2rem; }
+        .enroll-step::before {
+            content: ""; position: absolute; left: 15px; top: 32px;
+            height: calc(100% - 32px); width: 2px; background: #e9ecef;
+        }
+        .enroll-step:last-child::before { display: none; }
+        .step-icon {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: #fff; border: 2px solid #0d6efd; color: #0d6efd;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; z-index: 2; position: relative;
+        }
+        .step-active .step-icon { background: #0d6efd; color: #fff; }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+    <!-- Header -->
+    <section class="bg-primary text-white py-4 mb-4">
+        <div class="container">
+            <h1 class="fw-bold mb-0">Course Enrollment</h1>
+            <p class="lead mb-0 small opacity-75">You're just one step away from starting your learning journey.</p>
+        </div>
+    </section>
+
+    <div class="container pb-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="row g-4">
+                    <!-- Left: Enrollment Form -->
+                    <div class="col-md-7">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body p-4 p-md-5">
+                                <form th:action="@{/courses/{id}/enroll(id=${course.id})}"
+                                      th:object="${dto}"
+                                      method="post" id="enrollForm">
+                                    <input type="hidden" th:field="*{courseId}"/>
+
+                                    <!-- Step 1: Personal Information -->
+                                    <div class="enroll-step step-active">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="step-icon me-3">1</div>
+                                            <h5 class="fw-bold mb-0">Personal Information</h5>
+                                        </div>
+                                        <div class="ms-5 ps-2">
+                                            <div class="row g-3">
+                                                <div class="col-12">
+                                                    <label class="form-label small text-muted mb-1">Full Name</label>
+                                                    <input type="text" th:field="*{fullName}"
+                                                           class="form-control" required>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label small text-muted mb-1">Email Address</label>
+                                                    <input type="email" th:field="*{email}"
+                                                           class="form-control" required>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label small text-muted mb-1">Mobile Number</label>
+                                                    <input type="text" th:field="*{mobile}"
+                                                           class="form-control"
+                                                           placeholder="Not provided">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Step 2: Payment Method -->
+                                    <div class="enroll-step step-active">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="step-icon me-3">2</div>
+                                            <h5 class="fw-bold mb-0">Payment Method</h5>
+                                        </div>
+                                        <div class="ms-5 ps-2">
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <div class="form-check card border p-3 cursor-pointer h-100 transition" 
+                                                         onclick="document.getElementById('payBank').click()">
+                                                        <input class="form-check-input" type="radio"
+                                                               th:field="*{paymentMethod}"
+                                                               value="BANK_TRANSFER" id="payBank" required>
+                                                        <label class="form-check-label fw-semibold ms-2" for="payBank">
+                                                            <i class="bi bi-bank me-2 text-primary"></i>Bank Transfer
+                                                        </label>
+                                                        <div class="small text-muted mt-2 ms-4">Manual verification via transfer.</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-check card border p-3 cursor-pointer h-100 transition"
+                                                         onclick="document.getElementById('payOnline').click()">
+                                                        <input class="form-check-input" type="radio"
+                                                               th:field="*{paymentMethod}"
+                                                               value="INTERNET_BANKING" id="payOnline" required>
+                                                        <label class="form-check-label fw-semibold ms-2" for="payOnline">
+                                                            <i class="bi bi-globe me-2 text-primary"></i>Online Payment
+                                                        </label>
+                                                        <div class="small text-muted mt-2 ms-4">Instant access via VNPay/Internet Banking.</div>
+                                                    </div>
+                                                </div>
+                                                <div th:if="${#fields.hasErrors('paymentMethod')}"
+                                                     class="col-12 text-danger small"
+                                                     th:errors="*{paymentMethod}"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Step 3: Additional Notes -->
+                                    <div class="enroll-step">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="step-icon me-3">3</div>
+                                            <h5 class="fw-bold mb-0">Additional Notes</h5>
+                                        </div>
+                                        <div class="ms-5 ps-2">
+                                            <textarea th:field="*{enrollNote}" class="form-control border-light-subtle" 
+                                                      rows="3" placeholder="Any special requests or notes for our team?"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <div class="ms-5 ps-2 mt-4">
+                                        <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm">
+                                            <i class="bi bi-check-circle me-2"></i>Confirm Enrollment
+                                        </button>
+                                        <p class="text-center text-muted small mt-3">
+                                            <i class="bi bi-shield-check me-1"></i> Secure checkout powered by StudyHub
+                                        </p>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Order Summary -->
+                    <div class="col-md-5">
+                        <div class="card border-0 shadow-sm sticky-top" style="top: 2rem;">
+                            <div class="card-header bg-transparent p-4 border-bottom">
+                                <h5 class="fw-bold mb-0">Order Summary</h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <div class="d-flex gap-3 mb-4">
+                                    <div class="flex-shrink-0" style="width: 100px; height: 60px;">
+                                        <img th:src="${course.thumbnailUrl ?: '/images/default-thumbnail.png'}" 
+                                             class="w-100 h-100 object-fit-cover rounded border" alt="Course">
+                                    </div>
+                                    <div>
+                                        <div class="small text-primary fw-semibold mb-1" th:text="${course.categoryName}">Category</div>
+                                        <h6 class="fw-bold mb-0" th:text="${course.title}">Course Title</h6>
+                                    </div>
+                                </div>
+
+                                <div class="list-group list-group-flush mb-4">
+                                    <div class="list-group-item bg-transparent px-0 d-flex justify-content-between">
+                                        <span class="text-muted">Course Price</span>
+                                        <span class="fw-semibold" th:text="${#numbers.formatDecimal(course.price, 1, 'COMMA', 0, 'NONE') + ' ₫'}">0 ₫</span>
+                                    </div>
+                                    <div class="list-group-item bg-transparent px-0 d-flex justify-content-between">
+                                        <span class="text-muted">Discount</span>
+                                        <span class="text-success fw-semibold">0 ₫</span>
+                                    </div>
+                                    <div class="list-group-item bg-transparent px-0 d-flex justify-content-between border-top-0 pt-3">
+                                        <span class="fw-bold fs-5">Total</span>
+                                        <span class="fw-bold fs-5 text-primary" th:text="${#numbers.formatDecimal(course.price, 1, 'COMMA', 0, 'NONE') + ' ₫'}">0 ₫</span>
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-info border-0 bg-primary bg-opacity-10 mb-0">
+                                    <div class="d-flex">
+                                        <i class="bi bi-info-circle-fill text-primary me-2"></i>
+                                        <p class="small mb-0 text-dark">
+                                            Access to all course materials and lifetime updates included with your enrollment.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .cursor-pointer { cursor: pointer; }
+        .transition { transition: all 0.2s; }
+        .form-check.card:hover { border-color: #0d6efd !important; background: #f8fbff; }
+        .form-check-input:checked + .form-check-label::before { border-color: #0d6efd; }
+    </style>
+</div>
+</body>
+</html>

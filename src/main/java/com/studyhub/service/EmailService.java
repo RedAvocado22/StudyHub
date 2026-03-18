@@ -44,6 +44,20 @@ public class EmailService {
         send(user.getEmail(), "Your new StudyHub account", body);
     }
 
+    public void sendEnrollmentNotificationToEnrollee(String email, String fullName, String courseTitle) {
+        String body = "<p>Hello " + fullName + ",</p>"
+                + "<p>You have been successfully enrolled in <strong>" + courseTitle + "</strong> on StudyHub.</p>"
+                + "<p><a href=\"" + baseUrl + "/enrollments/me\">View your enrollments</a></p>";
+        send(email, "Enrollment Confirmation - " + courseTitle, body);
+    }
+
+    public void sendEnrollmentConfirmationToRegistrar(User registrar, String enrolledFullName, String courseTitle) {
+        String body = "<p>Hello " + registrar.getFullName() + ",</p>"
+                + "<p>You have successfully enrolled <strong>" + enrolledFullName + "</strong> in <strong>" + courseTitle + "</strong>.</p>"
+                + "<p>They will receive a separate notification with their enrollment details.</p>";
+        send(registrar.getEmail(), "Enrollment Submitted - " + courseTitle, body);
+    }
+
     private void send(String to, String subject, String htmlBody) {
         try {
             var message = mailSender.createMimeMessage();
