@@ -7,6 +7,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,4 +33,12 @@ public interface SettingRepository extends JpaRepository<Setting, Long>, JpaSpec
     long countByType_Name(String typeName);
 
     List<Setting> findByType_Name(String typeName);
+
+    @Query("""
+           SELECT s
+           FROM Setting s
+           JOIN FETCH s.type t
+           WHERE t.name = 'Course Category'
+           """)
+    List<Setting> findAllCategoriesFetch();
 }

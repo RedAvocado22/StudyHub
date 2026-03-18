@@ -39,6 +39,13 @@
                 <i class="bi bi-gear me-2"></i>Settings
             </a>
         </li>
+
+        <li class="nav-item" sec:authorize="hasAnyAuthority('ADMIN','MARKETING')">
+            <a th:href="@{/admin/post/list}" class="nav-link text-white"
+               th:classappend="${requestURI.startsWith('/admin/post/list')} ? 'active' : ''">
+                <i class="bi bi-book me-2"></i>Post List
+            </a>
+        </li>
     </ul>
 </nav>
 </body>

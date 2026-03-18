@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>User Profile</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container">
+        <div class="h2 mt-5 mb-3">
+            <a th:href="@{/profile}"
+               class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">
+                User Profile
+            </a>
+            <a th:href="@{/change-password}"
+               class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover ms-2">
+                Password Change
+            </a>
+        </div>
+        <form th:action="@{/profile}" th:object="${userProfileDTO}" method="post" enctype="multipart/form-data">
+            <div class="row">
+                <div class="col">
+                    <div class="container mt-3">
+                        <div>
+                            <img th:src="${user.profileImage}"
+                                 class="img-thumbnail mx-auto d-block" alt="Avatar" id="avatarPreview">
+                            <div class="h5 text-center" th:text="${user.email}"></div>
+                        </div>
+                        <div class="mx-auto text-center">
+                            <div>
+                                <label for="fileUpload" class="btn btn-sm btn-outline-primary">Choose other image</label>
+                                <input type="file" id="fileUpload" name="imageFile" accept="image/*" onchange="previewImage(this)" hidden>
+                                <div class="lead">Accept PNG,JPG,GIF,Max 5 Mb</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <!-- Thông báo lỗi tổng quát (nếu có) -->
+                    <div th:if="${#fields.hasAnyErrors()}" class="alert alert-danger">
+                        Vui lòng sửa các lỗi bên dưới!
+                    </div>
+                    <label for="l1" class="form-label">Full Name*</label>
+                    <input type="text" th:field="*{fullName}" class="form-control" placeholder="Full Name" id="l1">
+                    <div th:if="${#fields.hasErrors('fullName')}"
+                       th:errors="*{fullName}"
+                        class="text-danger">
+                    </div>
+                    <label for="l2" class="form-label">Mobile</label>
+                    <input type="text" th:field="*{mobile}" class="form-control" placeholder="Mobile" id="l2">
+                    <div th:if="${#fields.hasErrors('mobile')}"
+                         th:errors="*{mobile}"
+                         class="text-danger">
+                    </div>
+                    <label for="l3" class="form-label">Username*</label>
+                    <input type="text" th:field="*{username}" class="form-control" placeholder="Username" id="l3">
+                    <div th:if="${#fields.hasErrors('username')}"
+                         th:errors="*{username}"
+                         class="text-danger">
+                    </div>
+                    <label for="l4" class="form-label">Role</label>
+                    <select class="form-select" th:field="*{role}" id="l4">
+                        <option th:each="r : ${roles}" th:value="${r}" th:text="${r}"></option>
+                    </select>
+                    <button type="submit" class="btn btn-primary mb-3 mt-3">Submit</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+
+                // 1. Kiểm tra kích thước file (Option: 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert("File is too big! Maximum 5MB allowed.");
+                    input.value = ""; // Reset input
+                    return;
+                }
+
+                // 2. Đọc file và hiển thị preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('avatarPreview');
+                    preview.src = e.target.result; // Thay đổi src của ảnh thành dữ liệu Base64
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
+</div>
+</body>
+</html>
