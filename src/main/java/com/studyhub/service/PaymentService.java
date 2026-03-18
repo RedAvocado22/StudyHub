@@ -1,10 +1,7 @@
 package com.studyhub.service;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.net.URI;
 import com.studyhub.config.VnPayConfig;
 import com.studyhub.dto.EnrollRequestDTO;
 import com.studyhub.dto.PaymentResultDTO;
@@ -23,15 +20,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import vn.payos.PayOS;
-import vn.payos.type.CheckoutResponseData;
-import vn.payos.type.ItemData;
-import vn.payos.type.PaymentData;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.math.BigDecimal;
+import java.net.URI;
 import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
@@ -62,6 +59,20 @@ public class PaymentService {
 
     @Value("${payos.checksum-key}")
     private String checksumKey;
+
+    private static String hmacSHA512(String key, String data) {
+        try {
+            Mac mac = Mac.getInstance("HmacSHA512");
+            mac.init(new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "HmacSHA512"));
+            byte[] bytes = mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder();
+            for (byte b : bytes) sb.append(String.format("%02x", b));
+            return sb.toString();
+        } catch (Exception e) {
+            throw new IllegalArgumentException("HMAC error: " + e.getMessage());
+        }
+    }
+
     @Transactional
     public PaymentResultDTO enroll(EnrollRequestDTO dto, User registrar) {
         Course course = courseRepository.findById(dto.getCourseId())
@@ -141,7 +152,7 @@ public class PaymentService {
         return sb.toString();
     }
 
-    public  String createVnPayUrl(Long enrollmentId, String ipAddress) {
+    public String createVnPayUrl(Long enrollmentId, String ipAddress) {
         Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
                 .orElseThrow(() -> new IllegalArgumentException("Enrollment not found: " + enrollmentId));
 
@@ -215,6 +226,7 @@ public class PaymentService {
         enrollment.setStatus(EnrollmentStatus.APPROVED);
         enrollmentRepository.save(enrollment);
     }
+
     @Transactional
     public boolean handleVnPayReturn(Map<String, String> params) {
         if (!verifyVnPaySignature(params)) {
@@ -297,6 +309,7 @@ public class PaymentService {
             throw new IllegalArgumentException("HMAC error: " + e.getMessage());
         }
     }
+
     private boolean verifyVnPaySignature(Map<String, String> params) {
         String receivedHash = params.get("vnp_SecureHash");
         Map<String, String> filtered = new TreeMap<>(params);
@@ -316,18 +329,5 @@ public class PaymentService {
         );
 
         return expectedHash.equalsIgnoreCase(receivedHash);
-    }
-
-    private static String hmacSHA512(String key, String data) {
-        try {
-            Mac mac = Mac.getInstance("HmacSHA512");
-            mac.init(new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "HmacSHA512"));
-            byte[] bytes = mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
-            StringBuilder sb = new StringBuilder();
-            for (byte b : bytes) sb.append(String.format("%02x", b));
-            return sb.toString();
-        } catch (Exception e) {
-            throw new IllegalArgumentException("HMAC error: " + e.getMessage());
-        }
     }
 }

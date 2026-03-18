@@ -35,10 +35,10 @@ public interface SettingRepository extends JpaRepository<Setting, Long>, JpaSpec
     List<Setting> findByType_Name(String typeName);
 
     @Query("""
-           SELECT s
-           FROM Setting s
-           JOIN FETCH s.type t
-           WHERE t.name = 'Course Category'
-           """)
+            SELECT s
+            FROM Setting s
+            JOIN FETCH s.type t
+            WHERE t.name = 'Course Category'
+            """)
     List<Setting> findAllCategoriesFetch();
 }

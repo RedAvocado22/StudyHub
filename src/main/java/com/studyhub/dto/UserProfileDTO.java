@@ -12,10 +12,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UserProfileDTO {
     @NotBlank(message = "Không được để trống")
-    @Pattern(regexp = "^[a-zA-ZÀ-ỹ\\s]*$",message = "Chỉ được chứa chữ cái và khoảng trắng")
+    @Pattern(regexp = "^[a-zA-ZÀ-ỹ\\s]*$", message = "Chỉ được chứa chữ cái và khoảng trắng")
     private String fullName;
     @NotBlank(message = "Không được để trống")
-    @Pattern(regexp = "^[a-zA-Z]*$",message = "Chỉ được phép nhập chữ cái")
+    @Pattern(regexp = "^[a-zA-Z]*$", message = "Chỉ được phép nhập chữ cái")
     private String username;
     @Pattern(regexp = "^[0-9]{10}$", message = "Số điện thoại phải gồm đúng 10 chữ số")
     private String mobile;

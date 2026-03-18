@@ -16,15 +16,10 @@ import java.util.UUID;
 @Service
 public class FileUploadService {
 
-    @Value("${app.upload.dir}")
-    private String uploadDir;
-
     private static final long MAX_BYTES = 10L * 1024 * 1024;
-
     private static final Set<String> IMAGE_TYPES = Set.of(
             "image/jpeg", "image/png", "image/gif", "image/webp"
     );
-
     private static final Set<String> DOCUMENT_TYPES = Set.of(
             "application/pdf",
             "application/msword",
@@ -32,6 +27,8 @@ public class FileUploadService {
             "application/vnd.ms-excel",
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     );
+    @Value("${app.upload.dir}")
+    private String uploadDir;
 
     public String uploadImage(MultipartFile file) {
         validate(file, IMAGE_TYPES);

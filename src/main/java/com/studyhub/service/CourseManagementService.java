@@ -1,12 +1,6 @@
 package com.studyhub.service;
 
-import com.studyhub.dto.CourseUpdateDTO;
-import com.studyhub.dto.CourseCardDTO;
-import com.studyhub.dto.CourseDetailDTO;
-import com.studyhub.dto.CourseListDTO;
-import com.studyhub.dto.SettingListItemDTO;
-import com.studyhub.dto.UserListDTO;
-import com.studyhub.enums.CourseLevel;
+import com.studyhub.dto.*;
 import com.studyhub.enums.UserRole;
 import com.studyhub.model.Course;
 import com.studyhub.model.Setting;
@@ -21,14 +15,15 @@ import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import org.springframework.data.domain.Sort;
-
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 import static org.springframework.util.StringUtils.hasText;
 

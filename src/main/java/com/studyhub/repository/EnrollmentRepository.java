@@ -39,33 +39,33 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 
     @Query(
             value = """
-        SELECT e FROM Enrollment e
-        JOIN FETCH e.course c
-        LEFT JOIN FETCH e.user u
-        WHERE (:userId IS NULL OR u.id = :userId)
-          AND (:courseId IS NULL OR c.id = :courseId)
-          AND (:status   IS NULL OR e.status = :status)
-          AND (
-               :keyword IS NULL
-            OR LOWER(e.fullName) LIKE LOWER(CONCAT('%', :keyword, '%'))
-            OR LOWER(e.email)    LIKE LOWER(CONCAT('%', :keyword, '%'))
-            OR LOWER(c.title)    LIKE LOWER(CONCAT('%', :keyword, '%'))
-          )
-    """,
+                        SELECT e FROM Enrollment e
+                        JOIN FETCH e.course c
+                        LEFT JOIN FETCH e.user u
+                        WHERE (:userId IS NULL OR u.id = :userId)
+                          AND (:courseId IS NULL OR c.id = :courseId)
+                          AND (:status   IS NULL OR e.status = :status)
+                          AND (
+                               :keyword IS NULL
+                            OR LOWER(e.fullName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                            OR LOWER(e.email)    LIKE LOWER(CONCAT('%', :keyword, '%'))
+                            OR LOWER(c.title)    LIKE LOWER(CONCAT('%', :keyword, '%'))
+                          )
+                    """,
             countQuery = """
-        SELECT COUNT(e) FROM Enrollment e
-        JOIN e.course c
-        LEFT JOIN e.user u
-        WHERE (:userId IS NULL OR u.id = :userId)
-          AND (:courseId IS NULL OR c.id = :courseId)
-          AND (:status   IS NULL OR e.status = :status)
-          AND (
-               :keyword IS NULL
-            OR LOWER(e.fullName) LIKE LOWER(CONCAT('%', :keyword, '%'))
-            OR LOWER(e.email)    LIKE LOWER(CONCAT('%', :keyword, '%'))
-            OR LOWER(c.title)    LIKE LOWER(CONCAT('%', :keyword, '%'))
-          )
-    """
+                        SELECT COUNT(e) FROM Enrollment e
+                        JOIN e.course c
+                        LEFT JOIN e.user u
+                        WHERE (:userId IS NULL OR u.id = :userId)
+                          AND (:courseId IS NULL OR c.id = :courseId)
+                          AND (:status   IS NULL OR e.status = :status)
+                          AND (
+                               :keyword IS NULL
+                            OR LOWER(e.fullName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                            OR LOWER(e.email)    LIKE LOWER(CONCAT('%', :keyword, '%'))
+                            OR LOWER(c.title)    LIKE LOWER(CONCAT('%', :keyword, '%'))
+                          )
+                    """
     )
     Page<Enrollment> findByFilters(
             @Param("userId") Long userId,
@@ -74,6 +74,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
             @Param("keyword") String keyword,
             Pageable pageable
     );
+
     @Query("SELECT e.course.id FROM Enrollment e WHERE e.user.id = :userId")
     Set<Long> findCourseIdsByUserId(@Param("userId") Long userId);
 }

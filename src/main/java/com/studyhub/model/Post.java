@@ -9,8 +9,16 @@ import java.util.List;
 
 @Entity
 @Table(name = "posts")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Post {
+    @Column(name = "created_at", updatable = false)
+    LocalDateTime createdAt;
+    @Column(name = "updated_at")
+    LocalDateTime updatedAt;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -20,14 +28,10 @@ public class Post {
     @Column(columnDefinition = "TEXT")
     private String content;
     private String status;
-    @Column(name = "created_at",updatable = false)
-    LocalDateTime createdAt;
-    @Column(name = "updated_at")
-    LocalDateTime updatedAt;
-    @ManyToOne(fetch =  FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id")
     private User author;
-    @OneToMany(mappedBy = "post",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     @Singular
     @ToString.Exclude
     private List<Comment> comments;
@@ -39,11 +43,12 @@ public class Post {
 
     @PrePersist
     protected void onCreate() {
-        createdAt=LocalDateTime.now();
-        updatedAt=createdAt;
+        createdAt = LocalDateTime.now();
+        updatedAt = createdAt;
     }
+
     @PreUpdate
     protected void onUpdate() {
-        updatedAt=LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
     }
 }

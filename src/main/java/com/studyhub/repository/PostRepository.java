@@ -12,13 +12,14 @@ import java.util.Optional;
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
     @Query("""
-           SELECT DISTINCT p 
-           FROM Post p
-           LEFT JOIN FETCH p.author
-           LEFT JOIN FETCH p.category
-           LEFT JOIN FETCH p.comments
-           """)
+            SELECT DISTINCT p 
+            FROM Post p
+            LEFT JOIN FETCH p.author
+            LEFT JOIN FETCH p.category
+            LEFT JOIN FETCH p.comments
+            """)
     List<Post> findAllWithRelations();
+
     @Query("""
             SELECT DISTINCT p
             FROM Post p
@@ -36,33 +37,35 @@ public interface PostRepository extends JpaRepository<Post, Long> {
                            @Param("author") String author,
                            @Param("authorId") Long authorId,
                            org.springframework.data.domain.Sort sort);
+
     @Query("""
-           SELECT DISTINCT p FROM Post p
-           LEFT JOIN FETCH p.category
-           LEFT JOIN FETCH p.author
-           WHERE p.status = :status AND LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
-           """)
+            SELECT DISTINCT p FROM Post p
+            LEFT JOIN FETCH p.category
+            LEFT JOIN FETCH p.author
+            WHERE p.status = :status AND LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            """)
     List<Post> findByStatusAndTitleContainingIgnoreCase(@Param("status") String status, @Param("keyword") String keyword);
 
     @Query("""
-           SELECT DISTINCT p FROM Post p
-           LEFT JOIN FETCH p.category
-           LEFT JOIN FETCH p.author
-           WHERE p.status = :status
-           """)
+            SELECT DISTINCT p FROM Post p
+            LEFT JOIN FETCH p.category
+            LEFT JOIN FETCH p.author
+            WHERE p.status = :status
+            """)
     List<Post> findByStatus(@Param("status") String status);
 
     @Query("""
-           SELECT DISTINCT p FROM Post p
-           LEFT JOIN FETCH p.category
-           LEFT JOIN FETCH p.author
-           WHERE p.category.id = :categoryId AND p.status = :status
-           """)
+            SELECT DISTINCT p FROM Post p
+            LEFT JOIN FETCH p.category
+            LEFT JOIN FETCH p.author
+            WHERE p.category.id = :categoryId AND p.status = :status
+            """)
     List<Post> findByCategoryIdAndStatus(@Param("categoryId") Long categoryId, @Param("status") String status);
+
     @Query("""
-           SELECT p FROM Post p 
-           LEFT JOIN FETCH p.category 
-           WHERE p.id = :id
-           """)
+            SELECT p FROM Post p 
+            LEFT JOIN FETCH p.category 
+            WHERE p.id = :id
+            """)
     Optional<Post> findPostWithCategory(@Param("id") Long id);
 }

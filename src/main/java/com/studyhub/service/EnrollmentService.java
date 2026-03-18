@@ -38,6 +38,7 @@ public class EnrollmentService {
     public EnrollmentDTO findById(Long id) {
         return toDto(requireEnrollment(id));
     }
+
     public List<CourseDTO> findAllCourses() {
         return courseRepository.findAll(Sort.by(Sort.Direction.ASC, "title"))
                 .stream().map(this::toCourseDto).toList();
@@ -172,6 +173,7 @@ public class EnrollmentService {
         dto.setLastUpdated(e.getLastUpdated());
         return dto;
     }
+
     public Set<Long> findEnrolledCourseIdsByUser(Long userId) {
         return enrollmentRepository.findCourseIdsByUserId(userId);
     }

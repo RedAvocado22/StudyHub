@@ -9,7 +9,11 @@ import java.util.List;
 
 @Entity
 @Table(name = "chapters")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Chapter {
 
     @Id

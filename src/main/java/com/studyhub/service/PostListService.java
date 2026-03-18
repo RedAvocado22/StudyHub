@@ -45,7 +45,7 @@ public class PostListService {
     }
 
     public Setting findCategoryById(String category) {
-        Long id=Long.parseLong(String.valueOf(category));
+        Long id = Long.parseLong(String.valueOf(category));
         return settingRepository.findById(id).get();
     }
 
@@ -83,11 +83,11 @@ public class PostListService {
     }
 
     public List<Post> findBlogsByCategoryId(Long id) {
-        return postRepository.findByCategoryIdAndStatus(id,"Published");
+        return postRepository.findByCategoryIdAndStatus(id, "Published");
     }
 
     public List<Post> findBlogsByTitle(String title) {
-        return postRepository.findByStatusAndTitleContainingIgnoreCase("Published",title);
+        return postRepository.findByStatusAndTitleContainingIgnoreCase("Published", title);
     }
 
     public List<Comment> getCommentsByPostId(Long id) {

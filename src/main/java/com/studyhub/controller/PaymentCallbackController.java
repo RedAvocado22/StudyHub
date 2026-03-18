@@ -34,6 +34,7 @@ public class PaymentCallbackController {
         }
         return ResponseEntity.ok("OK");
     }
+
     @GetMapping("/payos/cancel")
     public String payosCancel(RedirectAttributes ra) {
         ra.addFlashAttribute("errorMessage", "Payment cancelled.");

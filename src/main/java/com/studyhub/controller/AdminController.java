@@ -1,31 +1,26 @@
 package com.studyhub.controller;
 
-import com.studyhub.dto.ChapterDTO;
-import com.studyhub.dto.LessonDTO;
-import com.studyhub.dto.CourseUpdateDTO;
-import com.studyhub.dto.CourseDetailDTO;
-import com.studyhub.dto.CreateUserDTO;
-import com.studyhub.dto.UpdateUserDTO;
-import com.studyhub.model.User;
+import com.studyhub.dto.*;
 import com.studyhub.enums.CourseLevel;
 import com.studyhub.enums.UserRole;
 import com.studyhub.enums.UserStatus;
+import com.studyhub.model.User;
 import com.studyhub.security.StudyHubUserDetails;
 import com.studyhub.service.CourseManagementService;
 import com.studyhub.service.FileUploadService;
 import com.studyhub.service.UserManagementService;
-import org.springframework.web.multipart.MultipartFile;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.validation.BindingResult;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
@@ -399,8 +394,8 @@ public class AdminController {
     }
 
     private String buildCourseQueryString(String search, Long categoryId, Long managerId,
-                                           BigDecimal minPrice, BigDecimal maxPrice,
-                                           String sortBy, String direction, int size) {
+                                          BigDecimal minPrice, BigDecimal maxPrice,
+                                          String sortBy, String direction, int size) {
         StringBuilder sb = new StringBuilder();
         if (search != null && !search.isBlank()) sb.append("&search=").append(search);
         if (categoryId != null) sb.append("&categoryId=").append(categoryId);

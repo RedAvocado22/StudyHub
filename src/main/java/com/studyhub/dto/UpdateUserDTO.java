@@ -6,7 +6,8 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter @Setter
+@Getter
+@Setter
 public class UpdateUserDTO {
 
     @NotBlank(message = "Full name is required")

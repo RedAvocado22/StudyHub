@@ -1,6 +1,9 @@
 package com.studyhub.controller;
 
-import com.studyhub.dto.*;
+import com.studyhub.dto.CourseDetailDTO;
+import com.studyhub.dto.EnrollRequestDTO;
+import com.studyhub.dto.EnrollmentDTO;
+import com.studyhub.dto.PaymentResultDTO;
 import com.studyhub.enums.EnrollmentStatus;
 import com.studyhub.model.User;
 import com.studyhub.security.StudyHubUserDetails;
@@ -13,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -42,7 +44,7 @@ public class EnrollmentController {
                        @RequestParam(defaultValue = "desc") String direction,
                        @RequestParam(defaultValue = "0") int page,
                        Model model) {
-        
+
         Sort sort = direction.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Page<EnrollmentDTO> enrollmentPage =
                 enrollmentService.findByFilters(userDetails.getUser().getId(), courseId, status, keyword, page, 8, sort);
@@ -83,6 +85,7 @@ public class EnrollmentController {
         }
         return "redirect:/enrollments/me";
     }
+
     @GetMapping("/courses/{id}/enroll")
     public String enrollForm(@PathVariable Long id,
                              @AuthenticationPrincipal StudyHubUserDetails principal,

@@ -1,4 +1,3 @@
-
 package com.studyhub.dto;
 
 import com.studyhub.enums.CourseLevel;

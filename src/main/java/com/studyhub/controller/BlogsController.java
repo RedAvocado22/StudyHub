@@ -22,8 +22,9 @@ import java.util.List;
 public class BlogsController {
     PostListService postListService;
     UserProfileService userProfileService;
+
     @Autowired
-    BlogsController(PostListService postListService,UserProfileService userProfileService) {
+    BlogsController(PostListService postListService, UserProfileService userProfileService) {
         this.postListService = postListService;
         this.userProfileService = userProfileService;
     }
@@ -38,9 +39,9 @@ public class BlogsController {
                                Model model,
                                @RequestParam(required = false) Long categoryId,
                                @RequestParam(required = false) String title) {
-        User user=userProfileService.getUserById(userDetails.getUser().getId());
-        List<Setting> categories=postListService.getAllCategories();
-        if(!model.containsAttribute("blogs")) {
+        User user = userProfileService.getUserById(userDetails.getUser().getId());
+        List<Setting> categories = postListService.getAllCategories();
+        if (!model.containsAttribute("blogs")) {
             List<Post> blogs;
             if (categoryId != null) {
                 blogs = postListService.findBlogsByCategoryId(categoryId);
@@ -51,38 +52,42 @@ public class BlogsController {
             }
             model.addAttribute("blogs", blogs);
         }
-        model.addAttribute("user",user);
-        model.addAttribute("categories",categories);
+        model.addAttribute("user", user);
+        model.addAttribute("categories", categories);
         return "blogs";
     }
+
     @GetMapping("/blogs-category/{id}")
     public String searchBlogsByCategory(RedirectAttributes ra,
                                         @PathVariable("id") Long id) {
-        List<Post> blogs=postListService.findBlogsByCategoryId(id);
-        ra.addFlashAttribute("blogs",blogs);
+        List<Post> blogs = postListService.findBlogsByCategoryId(id);
+        ra.addFlashAttribute("blogs", blogs);
         return "redirect:/blogs?categoryId=" + id;
     }
+
     @PostMapping("/blogs-search")
     public String searchBlogByTitle(RedirectAttributes ra,
                                     @RequestParam(name = "title") String title) {
-        List<Post> blogs=postListService.findBlogsByTitle(title);
-        ra.addFlashAttribute("blogs",blogs);
+        List<Post> blogs = postListService.findBlogsByTitle(title);
+        ra.addFlashAttribute("blogs", blogs);
         return "redirect:/blogs?title=" + title;
     }
+
     @GetMapping("/detail")
     public String blogDetail(@AuthenticationPrincipal StudyHubUserDetails userDetails,
                              Model model,
                              @RequestParam(name = "id") Long id) {
-        User user=userDetails.getUser();
-        Post post=postListService.findPostByIdFetch(id);
-        List<Comment> comments=postListService.getCommentsByPostId(id);
-        List<Setting> categories=postListService.getAllCategories();
-        model.addAttribute("user",user);
-        model.addAttribute("post",post);
-        model.addAttribute("comments",comments);
-        model.addAttribute("categories",categories);
+        User user = userDetails.getUser();
+        Post post = postListService.findPostByIdFetch(id);
+        List<Comment> comments = postListService.getCommentsByPostId(id);
+        List<Setting> categories = postListService.getAllCategories();
+        model.addAttribute("user", user);
+        model.addAttribute("post", post);
+        model.addAttribute("comments", comments);
+        model.addAttribute("categories", categories);
         return "blogDetail";
     }
+
     @PostMapping("/comment")
     public String postComment(@AuthenticationPrincipal StudyHubUserDetails userDetails,
                               @RequestParam("postId") Long postId,
