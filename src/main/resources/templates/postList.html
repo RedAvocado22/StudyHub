@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       layout:decorate="~{layout/admin}">
 <head><title>Post Management</title></head>
 <body>
@@ -34,7 +35,7 @@
                                 th:selected="${c.name == category}"></option>
                     </select>
                 </div>
-                <div class="col-6 col-md-3">
+                <div class="col-6 col-md-3" sec:authorize="hasAuthority('ADMIN')">
                     <label class="form-label small text-muted mb-1">Author</label>
                     <select name="author" class="form-select form-select-sm">
                         <option value="">All Authors</option>
