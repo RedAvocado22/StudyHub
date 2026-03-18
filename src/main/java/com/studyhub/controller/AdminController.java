@@ -46,9 +46,13 @@ public class AdminController {
     }
 
     @GetMapping
-    public String dashboard(Model model) {
+    public String dashboard(@AuthenticationPrincipal StudyHubUserDetails principal, Model model) {
         model.addAttribute("userStats", userManagementService.getDashboardStats());
-        model.addAttribute("totalCourses", courseManagementService.countPublishedCourses());
+        if (principal.getUser().getRole() == UserRole.MANAGER) {
+            model.addAttribute("totalCourses", courseManagementService.countPublishedCoursesByManager(principal.getUser().getId()));
+        } else {
+            model.addAttribute("totalCourses", courseManagementService.countPublishedCourses());
+        }
         return "admin/dashboard";
     }
 
@@ -169,6 +173,18 @@ public class AdminController {
         return "redirect:/admin/users/" + id;
     }
 
+    @PostMapping("/users/{id}/delete")
+    public String deleteUser(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            userManagementService.deleteUser(id);
+            redirectAttributes.addFlashAttribute("successMessage", "User deleted successfully.");
+            return "redirect:/admin/users";
+        } catch (IllegalStateException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/admin/users/" + id;
+        }
+    }
+
     @PostMapping("/users/{id}/status")
     public String updateStatus(
             @PathVariable Long id,
@@ -254,12 +270,31 @@ public class AdminController {
             CourseDetailDTO course = courseManagementService.findById(id);
             verifyCourseAccess(course, principal.getUser());
 
-            courseManagementService.updateCourse(id, courseUpdateDTO);
+            courseManagementService.updateCourse(id, courseUpdateDTO, principal.getUser().getRole());
             redirectAttributes.addFlashAttribute("successMessage", "Course updated successfully.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Failed to update course: " + e.getMessage());
         }
         return "redirect:/admin/courses/" + id;
+    }
+
+    @PostMapping("/courses/{id}/delete")
+    public String deleteCourse(@AuthenticationPrincipal StudyHubUserDetails principal,
+                               @PathVariable Long id,
+                               RedirectAttributes redirectAttributes) {
+        try {
+            CourseDetailDTO course = courseManagementService.findById(id);
+            verifyCourseAccess(course, principal.getUser());
+            courseManagementService.deleteCourse(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Course deleted successfully.");
+            return "redirect:/admin/courses";
+        } catch (IllegalStateException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/admin/courses/" + id;
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Failed to delete course: " + e.getMessage());
+            return "redirect:/admin/courses/" + id;
+        }
     }
 
     @GetMapping("/courses/{id}/content")
