@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin}">
+<head><title>Add Course</title></head>
+<body>
+<div layout:fragment="content">
+
+    <div class="d-flex align-items-center gap-2 mb-4">
+        <a th:href="@{/admin/courses}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Back
+        </a>
+        <h4 class="fw-bold mb-0">Add Course</h4>
+        <button type="submit" form="courseForm" class="btn btn-primary btn-sm ms-auto">
+            <i class="bi bi-plus-circle me-1"></i>Create Course
+        </button>
+    </div>
+
+    <form id="courseForm" th:action="@{/admin/courses}" method="post"
+          th:object="${courseCreateDTO}" novalidate>
+        <div class="row g-3">
+
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-header bg-transparent fw-semibold">Course Info</div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label small text-muted mb-1">Title <span class="text-danger">*</span></label>
+                            <input type="text" th:field="*{title}" class="form-control"
+                                   th:classappend="${#fields.hasErrors('title')} ? 'is-invalid'"
+                                   placeholder="e.g. Introduction to Spring Boot">
+                            <div class="invalid-feedback" th:errors="*{title}"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small text-muted mb-1">Description <span class="text-danger">*</span></label>
+                            <textarea th:field="*{description}" id="descriptionEditor" class="form-control"
+                                      th:classappend="${#fields.hasErrors('description')} ? 'is-invalid'"></textarea>
+                            <div class="invalid-feedback" th:errors="*{description}"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-header bg-transparent fw-semibold">Settings</div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label small text-muted mb-1">Category</label>
+                            <select th:field="*{categoryId}" class="form-select form-select-sm">
+                                <option value="">— No Category —</option>
+                                <option th:each="c : ${categories}"
+                                        th:value="${c.id}"
+                                        th:text="${c.name}"></option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small text-muted mb-1">Manager <span class="text-danger">*</span></label>
+                            <select th:field="*{managerId}" class="form-select form-select-sm"
+                                    th:classappend="${#fields.hasErrors('managerId')} ? 'is-invalid'">
+                                <option value="">— Select Manager —</option>
+                                <option th:each="m : ${managers}"
+                                        th:value="${m.id}"
+                                        th:text="${m.fullName}"></option>
+                            </select>
+                            <div class="invalid-feedback" th:errors="*{managerId}"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small text-muted mb-1">Level <span class="text-danger">*</span></label>
+                            <select th:field="*{level}" class="form-select form-select-sm"
+                                    th:classappend="${#fields.hasErrors('level')} ? 'is-invalid'">
+                                <option value="">— Select Level —</option>
+                                <option th:each="l : ${levels}" th:value="${l}" th:text="${l}"></option>
+                            </select>
+                            <div class="invalid-feedback" th:errors="*{level}"></div>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="form-label small text-muted mb-1">Price (₫) <span class="text-danger">*</span></label>
+                                <input type="number" th:field="*{price}" class="form-control form-control-sm"
+                                       th:classappend="${#fields.hasErrors('price')} ? 'is-invalid'"
+                                       placeholder="0" min="0" step="1000">
+                                <div class="invalid-feedback" th:errors="*{price}"></div>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small text-muted mb-1">Duration (h) <span class="text-danger">*</span></label>
+                                <input type="number" th:field="*{durationHours}" class="form-control form-control-sm"
+                                       th:classappend="${#fields.hasErrors('durationHours')} ? 'is-invalid'"
+                                       placeholder="e.g. 10" min="1" max="9999">
+                                <div class="invalid-feedback" th:errors="*{durationHours}"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-header bg-transparent fw-semibold">Thumbnail</div>
+                    <div class="card-body">
+                        <div class="mb-3 d-flex justify-content-center">
+                            <div class="rounded border bg-light d-flex align-items-center justify-content-center overflow-hidden"
+                                 style="width:100%;height:180px;">
+                                <img id="thumbnailPreview"
+                                     class="w-100 h-100 object-fit-cover d-none" alt="Thumbnail preview">
+                                <span id="thumbnailPlaceholder" class="text-muted small">
+                                    <i class="bi bi-image fs-2 d-block text-center mb-1"></i>
+                                    Preview
+                                </span>
+                            </div>
+                        </div>
+                        <label class="form-label small text-muted mb-1">Image URL</label>
+                        <input type="url" th:field="*{thumbnailUrl}" class="form-control form-control-sm"
+                               placeholder="https://..." oninput="previewThumbnail(this.value)">
+                        <div class="form-text">Paste a public image URL.</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </form>
+
+    <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+    <script>
+        var editor = CKEDITOR.replace('descriptionEditor', {
+            height: 350,
+            removeButtons: 'PasteFromWord'
+        });
+        editor.on('change', function () {
+            editor.updateElement();
+        });
+
+        function previewThumbnail(url) {
+            var img = document.getElementById('thumbnailPreview');
+            var placeholder = document.getElementById('thumbnailPlaceholder');
+            if (url && url.trim() !== '') {
+                img.src = url;
+                img.classList.remove('d-none');
+                placeholder.classList.add('d-none');
+                img.onerror = function () {
+                    img.classList.add('d-none');
+                    placeholder.classList.remove('d-none');
+                };
+            } else {
+                img.classList.add('d-none');
+                placeholder.classList.remove('d-none');
+            }
+        }
+    </script>
+</div>
+</body>
+</html>

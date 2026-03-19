@@ -244,6 +244,36 @@ public class AdminController {
         return "admin/courses/list";
     }
 
+    @GetMapping("/courses/new")
+    public String createCourseForm(Model model) {
+        model.addAttribute("courseCreateDTO", new CourseCreateDTO());
+        model.addAttribute("categories", courseManagementService.getCategories());
+        model.addAttribute("managers", courseManagementService.getManagers());
+        model.addAttribute("levels", CourseLevel.values());
+        return "admin/courses/create";
+    }
+
+    @PostMapping("/courses")
+    public String createCourse(@Valid @ModelAttribute CourseCreateDTO courseCreateDTO,
+                               BindingResult result,
+                               Model model,
+                               RedirectAttributes redirectAttributes) {
+        if (result.hasErrors()) {
+            model.addAttribute("categories", courseManagementService.getCategories());
+            model.addAttribute("managers", courseManagementService.getManagers());
+            model.addAttribute("levels", CourseLevel.values());
+            return "admin/courses/create";
+        }
+        try {
+            Long id = courseManagementService.createCourse(courseCreateDTO);
+            redirectAttributes.addFlashAttribute("successMessage", "Course created successfully.");
+            return "redirect:/admin/courses/" + id;
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Failed to create course: " + e.getMessage());
+            return "redirect:/admin/courses/new";
+        }
+    }
+
     @GetMapping("/courses/{id}")
     public String courseDetail(@AuthenticationPrincipal StudyHubUserDetails principal, @PathVariable Long id, Model model) {
         CourseDetailDTO course = courseManagementService.findById(id);

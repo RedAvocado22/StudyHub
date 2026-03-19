@@ -120,6 +120,32 @@ public class CourseManagementService {
     }
 
     @Transactional
+    public Long createCourse(CourseCreateDTO dto) {
+        User manager = userRepository.findById(dto.getManagerId())
+                .orElseThrow(() -> new NoSuchElementException("Manager not found"));
+
+        Setting category = null;
+        if (dto.getCategoryId() != null) {
+            category = settingRepository.findById(dto.getCategoryId())
+                    .orElseThrow(() -> new NoSuchElementException("Category not found"));
+        }
+
+        Course course = Course.builder()
+                .title(dto.getTitle())
+                .description(dto.getDescription())
+                .thumbnailUrl(dto.getThumbnailUrl())
+                .price(dto.getPrice())
+                .level(dto.getLevel())
+                .durationHours(dto.getDurationHours())
+                .category(category)
+                .manager(manager)
+                .published(false)
+                .build();
+
+        return courseRepository.save(course).getId();
+    }
+
+    @Transactional
     public void updateCourse(Long id, CourseUpdateDTO dto, UserRole callerRole) {
         Course course = courseRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Course not found"));
